@@ -59,6 +59,7 @@ then access the playground at <http://localhost:5555>
 > We use isolate to sandbox the playground, so you need to install it first.
 
 ```bash
+sudo apt-get install pkg-config libcap-dev libsystemd-dev
 git clone https://github.com/ioi/isolate /tmp/isolate
 cd /tmp/isolate
 make isolate isolate-check-environment
