@@ -46,7 +46,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 		 --run
 		 --
 
-		spawnlang -g
+		${spawn_path} -g
 		${prepare_user_arguments(snippet.build_arguments)}
 		${file}
 	')
@@ -117,7 +117,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 			--run
 			--
 
-			spawnlang --show-timings false
+			${spawn_path} --show-timings false
 			${prepare_user_arguments(snippet.build_arguments)}
 			--test ${file}
 		')
@@ -142,7 +142,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --run
 		 --
 
-		spawnlang --show-timings false
+		${spawn_path} --show-timings false
 		${prepare_user_arguments(snippet.build_arguments)}
 		${file}
 	')

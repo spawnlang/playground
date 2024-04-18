@@ -2,6 +2,7 @@ module main
 
 import vweb
 import os
+import runners
 
 struct VersionResponse {
 	version string
@@ -12,7 +13,7 @@ struct VersionResponse {
 // Returns VersionResponse with version or error.
 @['/version'; post]
 fn (mut app Server) version() vweb.Result {
-	res := os.execute('spawnlang --version')
+	res := os.execute('${runners.spawn_path} --version')
 	if res.exit_code != 0 {
 		return app.json(VersionResponse{
 			error: res.output

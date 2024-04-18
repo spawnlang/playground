@@ -17,7 +17,7 @@ pub fn retrieve_cgen_code(snippet models.CodeStorage) !(string, int, string) {
 	}
 
 	build_res := isolate.execute('
-		 spawnlang --showcc -g
+		 ${spawn_path} --showcc -g
 		 ${prepare_user_arguments(snippet.build_arguments)}
 		 ${box_path}/main.sp
 	')

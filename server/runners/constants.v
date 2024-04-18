@@ -1,7 +1,10 @@
 module runners
 
+pub const spawn_path = '/usr/local/bin/spawnlang'
+
 // Non-standard block size, different for different filesystems.
 const block_size = 4096
+
 const fs_usage_max_size_in_bytes = 3 * 1024 * 1024
 
 // From isolate docs:
@@ -9,10 +12,15 @@ const fs_usage_max_size_in_bytes = 3 * 1024 * 1024
 // Please note that this currently works only on the ext family of filesystems
 // (other filesystems use other interfaces for setting quotas).
 const block_max_count = u32(fs_usage_max_size_in_bytes / block_size)
+
 const inode_max_count = 50
+
 const max_run_processes_and_threads = 10
+
 const max_compiler_memory_in_kb = 100_000
+
 const max_run_memory_in_kb = 50_000
+
 const run_time_in_seconds = 2
 
 // From isolate docs:
