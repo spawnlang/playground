@@ -1,6 +1,7 @@
 module runners
 
 pub const spawn_path = '/usr/local/bin/spawnlang'
+pub const spawn_root = '/root/spawnlang'
 
 // Non-standard block size, different for different filesystems.
 const block_size = 4096

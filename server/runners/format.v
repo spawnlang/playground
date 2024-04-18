@@ -17,7 +17,7 @@ pub fn format_code(code string) !string {
 	vfmt_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
-		 --dir=${@VEXEROOT}
+		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --processes=3
 		 --mem=100000

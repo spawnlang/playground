@@ -38,7 +38,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 	build_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
-		 --dir=${@VEXEROOT}
+		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
@@ -61,7 +61,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 	run_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
-		 --dir=${@VEXEROOT}
+		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_run_memory_in_kb}
@@ -109,7 +109,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		run_res := isolate.execute('
 			isolate
 			--box-id=${box_id}
-			--dir=${@VEXEROOT}
+			--dir=${spawn_root}
 			--env=HOME=/box
 			--processes=${max_run_processes_and_threads}
 			--mem=${max_compiler_memory_in_kb}
@@ -134,7 +134,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 	build_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
-		 --dir=${@VEXEROOT}
+		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
@@ -157,7 +157,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 	run_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
-		 --dir=${@VEXEROOT}
+		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_run_memory_in_kb}
