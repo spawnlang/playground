@@ -56,108 +56,77 @@ export class RunnableCodeSnippet {
  * CodeRunner describes how to run, format, and share code.
  */
 export class CodeRunner {
-    public static runCode(snippet: RunnableCodeSnippet): Promise<RunCodeResponse> {
-        return fetch("/run", {
+    public static async runCode(snippet: RunnableCodeSnippet): Promise<RunCodeResponse> {
+        let resp1 = await fetch("/run", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("run", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as RunCodeResponse)
+        });
+        if (resp1.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("run", resp1))
+        }
+        return await resp1.json() as RunCodeResponse;
     }
 
-    public static runTest(snippet: RunnableCodeSnippet): Promise<RunCodeResponse> {
-        return fetch("/run_test", {
+    public static async runTest(snippet: RunnableCodeSnippet): Promise<RunCodeResponse> {
+        const resp = await fetch("/run_test", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("test", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as RunCodeResponse)
+        });
+        if (resp.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("test", resp));
+        }
+        return await resp.json() as RunCodeResponse;
     }
 
-    public static retrieveCgenCode(snippet: RunnableCodeSnippet): Promise<RetrieveCgenCodeResponse> {
-        return fetch("/cgen", {
+    public static async retrieveCgenCode(snippet: RunnableCodeSnippet): Promise<RetrieveCgenCodeResponse> {
+        let resp1 = await fetch("/cgen", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("cgen", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as RetrieveCgenCodeResponse)
+        });
+        if (resp1.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("cgen", resp1))
+        }
+        return await resp1.json() as RetrieveCgenCodeResponse;
     }
 
-    public static formatCode(snippet: RunnableCodeSnippet): Promise<FormatCodeResponse> {
-        return fetch("/format", {
+    public static async formatCode(snippet: RunnableCodeSnippet): Promise<FormatCodeResponse> {
+        let resp = await fetch("/format", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => resp.json())
-            .then(data => data as FormatCodeResponse)
+        });
+        return await resp.json() as FormatCodeResponse;
     }
 
-    public static shareCode(snippet: RunnableCodeSnippet): Promise<ShareCodeResponse> {
-        return fetch("/share", {
+    public static async shareCode(snippet: RunnableCodeSnippet): Promise<ShareCodeResponse> {
+        let resp1 = await fetch("/share", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("share", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as ShareCodeResponse)
+        });
+        if (resp1.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("share", resp1))
+        }
+        return await resp1.json() as ShareCodeResponse;
     }
 
-    public static createBugUrl(snippet: RunnableCodeSnippet): Promise<CreateBugResponse> {
-        return fetch("/create_bug_url", {
+    public static async createBugUrl(snippet: RunnableCodeSnippet): Promise<CreateBugResponse> {
+        let resp1 = await fetch("/create_bug_url", {
             method: "post",
             body: snippet.toFormData(),
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("create_bug_url", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as CreateBugResponse)
+        });
+        if (resp1.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("create_bug_url", resp1))
+        }
+        return await resp1.json() as CreateBugResponse;
     }
 
-    public static getVlangVersion(): Promise<VersionResponse> {
-        return fetch("/version", {
+    public static async getSpawnVersion(): Promise<VersionResponse> {
+        let resp1 = await fetch("/version", {
             method: "post",
-        })
-            .then(resp => {
-                if (resp.status != 200) {
-                    throw new Error(CodeRunner.buildErrorMessage("version", resp))
-                }
-
-                return resp
-            })
-            .then(resp => resp.json())
-            .then(data => data as VersionResponse)
+        });
+        if (resp1.status != 200) {
+            throw new Error(CodeRunner.buildErrorMessage("version", resp1))
+        }
+        return await resp1.json() as VersionResponse;
     }
 
     private static buildErrorMessage(kind: string, response: Response): string {

@@ -1,3 +1,5 @@
+import {Filter} from "../Ansi/ansi";
+
 type OnCloseCallback = () => void
 type OnWriteCallback = (text: string) => void
 type FilterCallback = (text: string) => boolean
@@ -12,7 +14,7 @@ export class Terminal {
     constructor(element: HTMLElement) {
         this.element = element
         this.tabsElement = this.element.querySelector(".js-terminal__tabs") as HTMLElement
-
+        this.tabsElement.querySelector(".js-terminal")
         this.attachResizeHandler(element)
     }
 
@@ -60,7 +62,7 @@ export class Terminal {
         const lines = text.split("\n")
         const outputElement = this.getTerminalOutputElement(buildLog)
         const filteredLines = lines.filter(line => this.filters.every(filter => filter(line)))
-        const newText = filteredLines.map(this.highlightLine).join("\n")
+        const newText = filteredLines.map(this.escapeLine).map(this.highlightLine).join("\n")
         outputElement.innerHTML += newText + "\n"
 
         if (this.onWrite !== null) {
@@ -68,31 +70,14 @@ export class Terminal {
         }
     }
 
-    private highlightLine(line: string): string {
-        // code.v:4:30: error: `sss` evaluated but not used
-        if (line.startsWith('code.v:') || line.startsWith('code_test.v:')) {
-            const parts = line.split(':')
-            const name = parts[0]
-            const lineNo = parseInt(parts[1])
-            const columnNo = parseInt(parts[2])
-            const kind = parts[3].trim()
-            const message = parts.slice(4).join(':')
-            return `${name}:${lineNo}:${columnNo}: <span class="message-${kind}">${kind}</span>:<span class="error">${message}</span>`
-        }
-
-        if (line.trim().startsWith("FAIL") && line.includes('code_test.v')) {
-            const data = line.trim().substring(4)
-            return `<span class="message-error">FAIL</span> ${data}`
-        }
-
-        if (line.trim().startsWith("OK") && line.includes('code_test.v')) {
-            const data = line.trim().substring(2)
-            return `<span class="message-success">OK</span> ${data}`
-        }
-
-        return line
+    private escapeLine(line: string): string {
+        return line.replace(/</g, "&lt;").replace(/>/g, "&gt;")
     }
 
+    private highlightLine(line: string): string {
+        let filter = new Filter({});
+        return filter.toHtml(line)
+    }
 
     public clear() {
         this.getTerminalOutputElement(false).innerHTML = ""

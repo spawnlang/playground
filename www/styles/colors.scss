@@ -36,8 +36,8 @@ html {
   --orange: rgb(244, 92, 75);
   --dark-transparent-orange: rgba(244, 92, 74, 0.2);
 
-  --brand-color: #ff6b00;
-  --brand-color-dark: #cc5307;
+  --brand-color: #3890fa;
+  --brand-color-dark: #2d76cd;
 }
 
 // light theme
@@ -124,6 +124,7 @@ html {
   // playground
   --playground-header-background-color: var(--white);
   --tools-background-color: var(--white);
+  --tools-border: var(--gray-ec);
 }
 
 // dark theme
@@ -210,4 +211,5 @@ html[data-theme="dark"] {
   // playground
   --playground-header-background-color: var(--gray-24);
   --tools-background-color: var(--dark-gray);
+  --tools-border: var(--gray-32);
 }

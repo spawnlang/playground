@@ -2,6 +2,7 @@ module runners
 
 import os
 import isolate
+import v.tests.local
 
 pub fn format_code(code string) !string {
 	box_path, box_id := isolate.init_sandbox()
@@ -9,7 +10,7 @@ pub fn format_code(code string) !string {
 		isolate.execute('isolate --box-id=${box_id} --cleanup')
 	}
 
-	os.write_file(os.join_path(box_path, 'code.v'), code) or {
+	os.write_file(os.join_path(box_path, 'main.sp'), code) or {
 		return error('Failed to write code to sandbox.')
 	}
 
@@ -23,7 +24,7 @@ pub fn format_code(code string) !string {
 		 --wall-time=2
 		 --run
 		 --
-		 ${@VEXEROOT}/v fmt code.v
+		 ~/spawnlang/cmd/fmt/sfmt main.sp
 	')
 
 	mut vfmt_output := $if local ? {

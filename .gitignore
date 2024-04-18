@@ -8,7 +8,7 @@ node_modules
 playground
 code_storage.db
 
-/code.v
-/code_test.v
+/main.sp
+/main_test.sp
 /code
 /code.dSYM

@@ -70,44 +70,11 @@ fn (mut app Server) init_once() {
 	app.serve_static('/', './www/public/')
 }
 
-// precompile_vfmt prepares the vfmt binary in the sandbox.
-//
-// V can't compile fmt first time in isolate because:
-//
-// `folder '/opt/vlang/cmd/tools' is not writable`
-//
-// when run `v fmt`, so we need to run `v fmt` first time outside isolate.
-fn precompile_vfmt() {
-	result := os.execute('${@VEXEROOT}/v fmt')
-
-	if result.exit_code != 0 {
-		panic(result.output)
-	}
-
-	$if debug {
-		eprintln('v fmt successfully precompiled.')
-	}
-}
-
-// precompile_vtest prepares the vtest binary in the sandbox.
-// See `precompile_vfmt` for more details.
-fn precompile_vtest() {
-	result := os.execute('${@VEXEROOT}/v test .')
-
-	if result.exit_code != 0 {
-		panic(result.output)
-	}
-
-	$if debug {
-		eprintln('v test successfully precompiled.')
-	}
-}
-
 fn main() {
 	mut fp := flag.new_flag_parser(os.args)
 	fp.application('Playground server')
-	fp.version('v0.2.0')
-	fp.description('A playground server for V language.')
+	fp.version('v0.0.1')
+	fp.description('A playground server for Spawn language.')
 	fp.skip_executable()
 	port := fp.int('port', `p`, default_port, 'port to run the server on')
 
@@ -116,9 +83,6 @@ fn main() {
 		println(fp.usage())
 		return
 	}
-
-	precompile_vfmt()
-	precompile_vtest()
 
 	mut app := &Server{}
 	app.init_once()

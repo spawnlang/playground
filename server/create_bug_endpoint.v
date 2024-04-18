@@ -12,7 +12,7 @@ struct CreateBugResponse {
 
 // create_bug_url endpoint is used to create link to submit a bug on GitHub.
 // Returns CreateBugResponse with link or error.
-['/create_bug_url'; post]
+@['/create_bug_url'; post]
 fn (mut app Server) create_bug_url() vweb.Result {
 	snippet := app.get_request_code() or {
 		return app.json(CreateBugResponse{
@@ -40,7 +40,7 @@ fn (mut app Server) create_bug_url() vweb.Result {
 		hash: hash
 	})
 
-	shared_link := 'https://vosca.dev/p/${hash}'
+	shared_link := 'https://spawnlang.dev/p/${hash}'
 	code := snippet.code.trim_right('\n')
 
 	mut values := urllib.new_values()
@@ -70,7 +70,7 @@ ${doctor_output}
 '.trim_indent())
 
 	params := values.encode()
-	url := 'https://github.com/vlang/v/issues/new?${params}'
+	url := 'https://github.com/spawnlang/spawn/issues/new?${params}'
 
 	return app.json(CreateBugResponse{
 		link: url

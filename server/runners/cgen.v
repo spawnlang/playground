@@ -4,6 +4,7 @@ import os
 import logger
 import isolate
 import models
+import term
 
 pub fn retrieve_cgen_code(snippet models.CodeStorage) !(string, int, string) {
 	box_path, box_id := isolate.init_sandbox()
@@ -11,14 +12,14 @@ pub fn retrieve_cgen_code(snippet models.CodeStorage) !(string, int, string) {
 		isolate.execute('isolate --box-id=${box_id} --cleanup')
 	}
 
-	os.write_file(os.join_path(box_path, 'code.v'), snippet.code) or {
+	os.write_file(os.join_path(box_path, 'main.sp'), snippet.code.replace('\r', '')) or {
 		return error('Failed to write code to sandbox.')
 	}
 
 	build_res := isolate.execute('
-		 ${@VEXEROOT}/v -showcc -keepc -cflags -DGC_MARKERS=1 -no-parallel -no-retry-compilation -skip-unused -g
+		 ~/spawnlang/spawnlang --showcc -g
 		 ${prepare_user_arguments(snippet.build_arguments)}
-		 ${box_path}/code.v
+		 ${box_path}/main.sp
 	')
 	build_output := build_res.output.trim_right('\n')
 
@@ -28,7 +29,7 @@ pub fn retrieve_cgen_code(snippet models.CodeStorage) !(string, int, string) {
 		// skip handling of errors for now
 	}
 
-	path_to_cgen := $if macos { '/tmp/v_501/code.tmp.c' } $else { '/tmp/v_0/code.tmp.c' }
+	path_to_cgen := os.expand_tilde_to_home('~/spawnlang/out.c')
 	cgen_file := os.read_file(path_to_cgen) or { return error('Failed to read generated C code.') }
 
 	return cgen_file, build_res.exit_code, build_output

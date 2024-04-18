@@ -29,7 +29,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 		isolate.execute('isolate --box-id=${box_id} --cleanup')
 	}
 
-	file := 'code.v'
+	file := 'main.sp'
 
 	os.write_file(os.join_path(box_path, file), snippet.code) or {
 		return error('Failed to write code to sandbox.')
@@ -46,7 +46,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 		 --run
 		 --
 
-		${@VEXEROOT}/v -cflags -DGC_MARKERS=1 -no-parallel -no-retry-compilation -g
+		~/spawnlang/spawnlang -g
 		${prepare_user_arguments(snippet.build_arguments)}
 		${file}
 	')
@@ -99,9 +99,9 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		isolate.execute('isolate --box-id=${box_id} --cleanup')
 	}
 
-	file := if as_test { 'code_test.v' } else { 'code.v' }
+	file := if as_test { 'main_test.sp' } else { 'main.sp' }
 
-	os.write_file(os.join_path(box_path, file), snippet.code) or {
+	os.write_file(os.join_path(box_path, file), snippet.code.replace('\r', '')) or {
 		return error('Failed to write code to sandbox.')
 	}
 
@@ -117,9 +117,9 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 			--run
 			--
 
-			${@VEXEROOT}/v -cflags -DGC_MARKERS=1 -no-parallel -no-retry-compilation -g
+			~/spawnlang/spawnlang --show-timings false
 			${prepare_user_arguments(snippet.build_arguments)}
-			test ${file}
+			--test ${file}
 		')
 		run_output := run_res.output.trim_right('\n')
 
@@ -142,7 +142,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --run
 		 --
 
-		${@VEXEROOT}/v -cflags -DGC_MARKERS=1 -no-parallel -no-retry-compilation -g
+		~/spawnlang/spawnlang --show-timings false
 		${prepare_user_arguments(snippet.build_arguments)}
 		${file}
 	')
@@ -165,7 +165,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --wall-time=${wall_time_in_seconds}
 		 --run
 		 --
-		 ./code
+		 ./out
 		 ${prepare_user_arguments(snippet.run_arguments)}
 	')
 
@@ -183,7 +183,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 
 	// isolate output message like "OK (0.033 sec real, 0.219 sec wall)"
 	// we want to remove it
-	if run_res_result_lines.last().starts_with('OK (') {
+	if run_res_result_lines.len > 0 && run_res_result_lines.last().starts_with('OK (') {
 		run_res_result_lines = run_res_result_lines#[..-1]
 		run_res_result = run_res_result_lines.join('\n')
 	}

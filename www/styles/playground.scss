@@ -30,21 +30,33 @@ html[data-theme='dark'] {
   --tools-button-hover: #393b41;
   --configuration-item-hover: #2f446e;
   --terminal-header-border: #323438;
-  --terminal-header: #2a2a2d;
+  --terminal-header: #2b2d30;
   --terminal-header-text: #f7f8fa;
   --terminal-close-button: #d9dbe2;
   --terminal-close-button-hover: #393b41;
   --terminal-tab-hover: #393b41;
   --terminal-text: #BBBBBB;
-  --terminal-background: #000;
+  --terminal-background: #1e1f22;
   --terminal-ok: #43c449;
   --terminal-error: #e04949;
   --playground-link: #8d8d8d;
   --run-embeded-icon-color: #fff;
   --completion-variant-background: #2e436e;
   --completion-variant-color: #b4b8c0;
+  --completion-variant-details-color: #6c7078;
   --completion-module-icon: url("../public/images/module.svg");
   --completion-type-icon: url("../public/images/type.svg");
+
+  --completion-struct-icon: url("../public/images/icons/class_dark.svg");
+  --completion-function-icon: url("../public/images/icons/function_dark.svg");
+  --completion-method-icon: url("../public/images/icons/method_dark.svg");
+  --completion-property-icon: url("../public/images/icons/property_dark.svg");
+  --completion-variable-icon: url("../public/images/icons/variable_dark.svg");
+  --completion-enum-icon: url("../public/images/icons/enum_dark.svg");
+  --completion-interface-icon: url("../public/images/icons/interface_dark.svg");
+  --completion-static-method-icon: url("../public/images/icons/static_dark.svg");
+  --completion-constant-icon: url("../public/images/icons/constant_dark.svg");
+  --completion-parameter-icon: url("../public/images/icons/parameter_dark.svg");
 
   --inline-button-text-color: var(--gray-7e);
   --inline-button-hover-text-color: var(--gray-be);
@@ -62,7 +74,7 @@ body {
   margin: 0;
   padding: 70px 0 0 0;
 
-  font: 400 14px "JetBrainsSans", Helvetica, Arial, sans-serif;
+  font: 400 14px "SF Pro Text", "Segoe UI", "Ubuntu", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 
   background-color: var(--background-color);
@@ -81,6 +93,10 @@ body.dragging {
   }
 }
 
+.tools {
+  visibility: hidden;
+}
+
 header {
   //background: var(--playground-header-background-color) !important;
 }
@@ -88,7 +104,7 @@ header {
 main {
   top: 70px;
   display: grid;
-  grid-template-rows: 65px calc(100vh - 70px - 65px);
+  grid-template-rows: 0 calc(100vh - 70px);
 }
 
 .v-playground {
@@ -173,7 +189,6 @@ main {
       height: 100%;
 
       background-color: var(--tools-background-color);
-      border-top: 1px solid var(--tools-border);
       border-bottom: 1px solid var(--tools-border);
 
       ul {
@@ -220,6 +235,10 @@ main {
               width: 10px;
               margin-top: 0;
               margin-left: 0;
+
+              rect {
+                fill: var(--text-color);
+              }
             }
           }
         }
@@ -233,13 +252,13 @@ main {
   min-height: 150px;
   max-height: 75vh;
   display: grid;
-  grid-template-rows: 35px auto;
+  grid-template-rows: 32px auto;
 
   .header {
     display: grid;
     grid-template-columns: max-content auto max-content;
 
-    padding: 11px 10px 0 15px;
+    padding: 9px 10px 0 15px;
     font-size: 12px;
     font-weight: 600;
     color: var(--terminal-header-text);
@@ -266,6 +285,7 @@ main {
 
         &:checked + label {
           border-bottom: solid 3px var(--blue);
+          height: calc(100% + 1px);
         }
       }
 
@@ -326,6 +346,10 @@ main {
       background-color: var(--terminal-background);
     }
 
+    .base-terminal-color {
+      color: var(--terminal-text);
+    }
+
     .message-success {
       color: var(--terminal-success-text-color);
     }
@@ -354,7 +378,7 @@ main {
   background-color: var(--background-color);
 
   .CodeMirror-scroll {
-    //padding-top: 20px;
+    padding-top: 20px;
     padding-bottom: 0;
   }
 
@@ -380,7 +404,7 @@ main {
   z-index: 10;
   overflow: hidden;
   list-style: none;
-  min-width: 200px;
+  min-width: 300px;
   margin: 0;
   padding: 4px;
   -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
@@ -390,7 +414,7 @@ main {
   border: 1px solid var(--select-header-border);
   background: var(--select-background);
   color: var(--completion-variant-color);
-  font-size: 14px;
+  font-size: 13px;
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace;
   max-height: 20em;
   overflow-y: auto;
@@ -405,9 +429,77 @@ main {
       font-weight: 600;
     }
 
+    .CodeMirror-hint-details {
+      color: var(--completion-variant-details-color);
+    }
+
+    .CodeMirror-hint-description {
+      color: var(--completion-variant-details-color);
+    }
+
     &.completion-type {
       &::before {
         background-image: var(--completion-type-icon);
+      }
+    }
+
+    &.completion-struct {
+      &::before {
+        background-image: var(--completion-struct-icon);
+      }
+    }
+
+    &.completion-function {
+      &::before {
+        background-image: var(--completion-function-icon);
+      }
+    }
+
+    &.completion-method {
+      &::before {
+        background-image: var(--completion-method-icon);
+      }
+    }
+
+    &.completion-property {
+      &::before {
+        background-image: var(--completion-property-icon);
+      }
+    }
+
+    &.completion-variable {
+      &::before {
+        background-image: var(--completion-variable-icon);
+      }
+    }
+
+    &.completion-enum {
+      &::before {
+        background-image: var(--completion-enum-icon);
+      }
+    }
+
+    &.completion-interface {
+      &::before {
+        background-image: var(--completion-interface-icon);
+      }
+    }
+
+    &.completion-static-method {
+      &::before {
+        background-image: var(--completion-static-method-icon);
+      }
+    }
+
+    &.completion-constant {
+      &::before {
+        background-image: var(--completion-constant-icon);
+      }
+    }
+
+    &.completion-parameter {
+      &::before {
+        background-image: var(--completion-parameter-icon);
       }
     }
 

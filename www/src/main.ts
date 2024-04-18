@@ -1,10 +1,10 @@
-import "./v"
-import "./v-hint"
+import "./spawn"
+import "./spawn-hint"
 
 import { Playground, PlaygroundDefaultAction } from "./Playground"
 import {CodeRunner} from "./CodeRunner/CodeRunner";
 
-CodeRunner.getVlangVersion().then(resp => {
+CodeRunner.getSpawnVersion().then(resp => {
     const versionElement = document.querySelector('.js-version-info') as HTMLElement
     versionElement.innerHTML = resp.version
 })

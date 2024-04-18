@@ -60,7 +60,7 @@ export class Playground {
         }
 
         this.terminal = new Terminal(terminalElement)
-        this.editor = new Editor("main", editorElement, this.repository, this.terminal, false, "v")
+        this.editor = new Editor("main", editorElement, this.repository, this.terminal, false, "spawn")
         this.cgenEditor = new Editor("cgen", editorElement, new TextCodeRepository(""), this.terminal, true, "text/x-csrc")
         this.cgenEditor.hide()
 
@@ -134,25 +134,26 @@ export class Playground {
             this.disableCgenMode()
         })
 
-        this.registerAction("create-bug", () => {
-            this.clearTerminal()
-            this.openOutputTab()
-            this.writeTerminalOutput("Creating bug report url...")
-            const url = CodeRunner.createBugUrl(this.editor.getRunnableCodeSnippet(this.runConfigurationManager))
-            url.then((resp) => {
-                if (resp.error != '') {
-                    this.writeTerminalOutput("Error creating bug report url: " + resp.error)
-                    return
-                }
-                this.writeTerminalOutput("Bug report url created, opening GitHub in new tab...")
-
-                copyTextToClipboard(resp.link, () => {
-                    this.writeTerminalOutput("Bug report url copied to clipboard")
-                }).then(() => {
-                    window.open(resp.link, '_blank');
-                })
-            })
-        })
+        // TODO: uncomment when public bug report feature is ready
+        // this.registerAction("create-bug", () => {
+        //     this.clearTerminal()
+        //     this.openOutputTab()
+        //     this.writeTerminalOutput("Creating bug report url...")
+        //     const url = CodeRunner.createBugUrl(this.editor.getRunnableCodeSnippet(this.runConfigurationManager))
+        //     url.then((resp) => {
+        //         if (resp.error != '') {
+        //             this.writeTerminalOutput("Error creating bug report url: " + resp.error)
+        //             return
+        //         }
+        //         this.writeTerminalOutput("Bug report url created, opening GitHub in new tab...")
+        //
+        //         copyTextToClipboard(resp.link, () => {
+        //             this.writeTerminalOutput("Bug report url copied to clipboard")
+        //         }).then(() => {
+        //             window.open(resp.link, '_blank');
+        //         })
+        //     })
+        // })
 
         this.terminal.registerCloseHandler(() => {
             this.closeTerminal()
@@ -300,7 +301,7 @@ export class Playground {
                             const parts = line.split(" ")
                             const lineNo = parseInt(parts[1])
                             const file = parts[2]
-                            if (!file.includes("code.v")) {
+                            if (!file.includes("main.sp")) {
                                 continue
                             }
                             // @ts-ignore
@@ -401,7 +402,7 @@ export class Playground {
     }
 
     private buildShareLink(result: ShareCodeResponse) {
-        return `https://vosca.dev/p/${result.hash}`
+        return `https://spawnlang.dev/p/${result.hash}`
     }
 
     public changeTheme(): void {

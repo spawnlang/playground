@@ -1,7 +1,7 @@
 Module {
-    name: 'V Playground Server'
-    version: '0.3.0'
-    description: 'V Playground Server'
+    name: 'Spawn Playground Server'
+    version: '0.1.0'
+    description: 'Spawn Playground Server'
     license: 'MIT'
     dependencies: [
         'srackham.pcre2'

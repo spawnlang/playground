@@ -8,10 +8,12 @@ export class LocalCodeRepository implements CodeRepository {
 
     // language=V
     public static readonly WELCOME_CODE = `
-// Welcome to the V Playground!
-// Here you can edit, run, and share V code.
+// Welcome to the Spawn Playground!
+// Here you can edit, run, and share Spawn code.
 // Let's start with a simple "Hello, Playground!" example:
-println('Hello, Playground!')
+fn main() {
+    println('Hello, Playground!')
+}
 
 // To run the code, click the "Run" button or just press Ctrl + R.
 // To format the code, click the "Format" button or just press Ctrl + L.
@@ -19,8 +21,8 @@ println('Hello, Playground!')
 // More examples are available in top dropdown list.
 // You can find Help for shortcuts in the bottom right corner or just press Ctrl + I.
 // See also change theme button in the top right corner.
-// If you want to learn more about V, visit https://docs.vosca.dev/ and https://learn.vosca.dev/
-// Join us on Discord: https://discord.gg/vlang
+// If you want to learn more about Spawn, visit https://docs.spawnlang.dev/.
+// Join us on Discord: https://discord.gg/dW4ytWQyEY
 // Enjoy!
 `.trimStart()
 

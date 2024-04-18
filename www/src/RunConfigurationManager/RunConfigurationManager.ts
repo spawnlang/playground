@@ -57,10 +57,13 @@ export class RunConfigurationManager {
     private fromQueryParam: boolean = false
 
     private readonly runButton = document.querySelector(".js-run__action")!
-    private readonly runButtonLabel = document.querySelector(".js-run__action .label")!
+    private readonly runButtonLabel = document.querySelector(".js-open-run-select .configuration-name")!
     private readonly openRunButton = document.querySelector(".js-open-run-select")!
     private readonly configurationsList = document.querySelector(".js-run-configurations-list")!
     private readonly configurationsOverlay = document.querySelector(".js-run-configurations-list-overlay")!
+    private readonly openSettingsPopup = document.querySelector(".js-open-settings-popup")!
+    private readonly settingsPopup = document.querySelector(".js-settings-popup")!
+    private readonly settingsOverlay = document.querySelector(".js-settings-popup-overlay")!
     private readonly configurations = document.querySelectorAll(".js-configuration")!
     private readonly buildArgumentsInput = document.querySelector(".js-build-arguments-input") as HTMLInputElement
     private readonly runArgumentsInput = document.querySelector(".js-run-arguments-input") as HTMLInputElement
@@ -91,11 +94,25 @@ export class RunConfigurationManager {
     public toggleConfigurationsList() {
         this.configurationsList.classList.toggle("hidden")
         this.configurationsOverlay.classList.toggle("opened")
+
+        this.closeSettingsPopup()
     }
 
     public closeConfigurationsList() {
         this.configurationsList.classList.add("hidden")
         this.configurationsOverlay.classList.remove("opened")
+    }
+
+    public toggleSettingsPopup() {
+        this.settingsPopup.classList.toggle("hidden")
+        this.settingsOverlay.classList.toggle("opened")
+
+        this.closeConfigurationsList()
+    }
+
+    public closeSettingsPopup() {
+        this.settingsPopup.classList.add("hidden")
+        this.settingsOverlay.classList.remove("opened")
     }
 
     public setupConfiguration() {
@@ -131,7 +148,7 @@ export class RunConfigurationManager {
 
         const runConfigurationAsString = RunConfigurationType[runConfigurationType]
         this.runButton.setAttribute("data-type", runConfigurationAsString)
-        this.runButtonLabel.textContent = runConfigurationAsString
+        this.runButtonLabel.textContent = runConfigurationAsString + " main.sp"
 
         if (runConfigurationType == RunConfigurationType.Cgen) {
             this.runButtonLabel.textContent = "Show generated C code"
@@ -176,6 +193,10 @@ export class RunConfigurationManager {
             this.toggleConfigurationsList()
         })
 
+        this.openSettingsPopup.addEventListener("click", () => {
+            this.toggleSettingsPopup()
+        })
+
         this.buildArgumentsInput.addEventListener("input", () => {
             window.localStorage.setItem(RunConfigurationManager.LOCAL_STORAGE_BUILD_ARGUMENTS_KEY, this.buildArgumentsInput.value)
         })
@@ -188,9 +209,14 @@ export class RunConfigurationManager {
             this.toggleConfigurationsList()
         })
 
+        this.settingsOverlay.addEventListener("click", () => {
+            this.toggleSettingsPopup()
+        })
+
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 this.closeConfigurationsList()
+                this.closeSettingsPopup()
             }
         })
 

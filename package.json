@@ -1,7 +1,7 @@
 {
-  "name": "v-playground",
-  "version": "0.3.0",
-  "description": "Source code for V Playground website and backend",
+  "name": "spawn-playground",
+  "version": "0.1.0",
+  "description": "Source code of Spawn Playground website and backend",
   "scripts": {
     "install-server-deps": "cd server && v install",
     "build-ts": "cd ./www && npm ci && npm run build",
@@ -17,17 +17,17 @@
     "clean": "rm -rf ./server/bin"
   },
   "author": {
-    "name": "V Open Source Community Association",
-    "url": "https://vosca.dev/"
+    "name": "Spawn Authors",
+    "url": "https://spawnlang.dev/"
   },
   "contributors": [
     "Petr Makhnev",
     "Mark @walkingdevel"
   ],
   "bugs": {
-    "url": "https://github.com/vlang-association/playground/issues"
+    "url": "https://github.com/spawnlang/playground/issues"
   },
-  "homepage": "https://play.vosca.dev/",
+  "homepage": "https://play.spawnlang.dev/",
   "dependencies": {
     "sass": "^1.62.0"
   }

@@ -1,6 +1,6 @@
-# V Playground Server
+# Spawn Playground Server
 
-This is the server for the V Playground.
+This is the server for the Spawn Playground.
 
 ## Endpoints
 
@@ -70,7 +70,7 @@ curl -X POST localhost:5555/run_test -F 'code="fn test_foo() { assert 100 == 100
 
 ### POST `/cgen`
 
-Retrieve the C code generated from the passed V code.
+Retrieve the C code generated from the passed Spawn code.
 If an error occurs, the error will be returned in the `error` field.
 
 Required form field:

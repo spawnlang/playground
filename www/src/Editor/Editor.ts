@@ -1,6 +1,5 @@
 import {CodeRepository, LocalCodeRepository, SharedCodeRepository} from "../Repositories"
 import {ITheme} from "../themes"
-import {codeIfSharedLinkBroken} from "../Examples"
 import {Terminal} from "../Terminal/Terminal"
 import {RunnableCodeSnippet} from "../CodeRunner/CodeRunner";
 import {
@@ -11,22 +10,22 @@ import {
 export class Editor {
     private static readonly FONT_LOCAL_STORAGE_KEY = "editor-font-size"
 
-    private wrapperElement: HTMLElement
     private readonly textAreaElement: HTMLTextAreaElement
     private repository: CodeRepository
     public editor: CodeMirror.Editor
 
     constructor(id: string, wrapper: HTMLElement, repository: CodeRepository, public terminal: Terminal, readOnly: boolean, mode: string) {
-        const editorConfig = {
+        const editorConfig: CodeMirror.EditorConfiguration = {
             mode: mode,
             lineNumbers: true,
+            // @ts-ignore
             matchBrackets: true,
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
                 "Ctrl-/": "toggleComment",
             },
             readOnly: readOnly,
-            indentWithTabs: true,
+            indentWithTabs: false,
             indentUnit: 4,
             autoCloseBrackets: true,
             showHint: true,
@@ -41,8 +40,6 @@ export class Editor {
             },
             theme: "dark",
         }
-
-        this.wrapperElement = wrapper
 
         this.textAreaElement = wrapper.querySelector(`textarea.${id}`)! as HTMLTextAreaElement
         // @ts-ignore
@@ -101,7 +98,7 @@ export class Editor {
     }
 
     public getRunnableCodeSnippet(runConfiguration: RunConfigurationManager): RunnableCodeSnippet {
-        return new RunnableCodeSnippet(this.getCode(), runConfiguration.buildArguments,  runConfiguration.runArguments, toSharedRunConfiguration(runConfiguration.configuration))
+        return new RunnableCodeSnippet(this.getCode(), runConfiguration.buildArguments, runConfiguration.runArguments, toSharedRunConfiguration(runConfiguration.configuration))
     }
 
     public clear() {

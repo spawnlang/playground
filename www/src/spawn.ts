@@ -1,11 +1,4 @@
 import {EditorConfiguration, Mode, StringStream} from "codemirror"
-import {
-    ifAttributesRegexp,
-    keyValueAttributesRegexp,
-    severalSingleKeyValueAttributesRegexp,
-    simpleAttributesRegexp,
-    singleKeyValueAttributesRegexp,
-} from "./v-hint"
 
 type Quota = "'" | "\"" | "`"
 type Tokenizer = (stream: StringStream, state: ModeState) => string | null
@@ -63,9 +56,7 @@ class Context {
 
 export const keywords: Set<string> = new Set<string>([
     "as",
-    "asm",
     "assert",
-    "atomic",
     "break",
     "const",
     "continue",
@@ -74,15 +65,12 @@ export const keywords: Set<string> = new Set<string>([
     "enum",
     "fn",
     "for",
-    "go",
     "goto",
     "if",
     "import",
     "in",
     "interface",
     "is",
-    "isreftype",
-    "lock",
     "match",
     "module",
     "mut",
@@ -90,71 +78,52 @@ export const keywords: Set<string> = new Set<string>([
     "or",
     "pub",
     "return",
-    "rlock",
     "select",
-    "shared",
-    "sizeof",
-    "static",
     "struct",
     "spawn",
     "type",
-    "typeof",
     "union",
     "unsafe",
-    "volatile",
-    "__global",
-    "__offsetof",
+    "test",
+    "var",
 ])
 
 export const pseudoKeywords: Set<string> = new Set<string>([
-    "sql",
     "chan",
-    "thread",
-])
-
-export const hashDirectives: Set<string> = new Set<string>([
-    "#flag",
-    "#include",
-    "#pkgconfig",
 ])
 
 export const atoms: Set<string> = new Set<string>([
     "true",
     "false",
     "nil",
-    "print",
-    "println",
-    "exit",
-    "panic",
-    "error",
-    "dump",
 ])
 
 export const builtinTypes: Set<string> = new Set<string>([
     "bool",
     "string",
+    "rune",
     "i8",
     "i16",
     "int",
     "i32",
     "i64",
     "i128",
+    "isize",
     "u8",
     "u16",
     "u32",
     "u64",
     "u128",
-    "rune",
+    "usize",
     "f32",
     "f64",
-    "isize",
-    "usize",
-    "voidptr",
+    "void",
+    "unit",
     "any",
 ])
 
 // @ts-ignore
-CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
+CodeMirror.defineMode("spawn", (config: EditorConfiguration): Mode<ModeState> => {
     const indentUnit = config.indentUnit ?? 0
 
     const isOperatorChar = /[+\-*&^%:=<>!?|\/]/
@@ -183,6 +152,12 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
             return state.tokenize(stream, state)
         }
 
+        if (ch == "b" && stream.peek() == "`") {
+            stream.next()
+            state.tokenize = tokenString("`")
+            return "string"
+        }
+
         // r'foo' or c'foo'
         // r"foo" or c"foo"
         if ((ch === "r" || ch === "c") && (stream.peek() == "\"" || stream.peek() == "'")) {
@@ -200,36 +175,11 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
             }
         }
 
-        // probably attribute
-        // [attr]
-        // [attr: value]
-        // [attr1; attr2]
-        if (ch === "[") {
-            // [unsafe]
-            if (stream.match(simpleAttributesRegexp)) {
-                return "attribute"
-            }
-
-            // [sql: foo]
-            if (stream.match(singleKeyValueAttributesRegexp)) {
-                return "attribute"
-            }
-
-            // [sql; foo]
-            if (stream.match(severalSingleKeyValueAttributesRegexp)) {
-                return "attribute"
-            }
-
-            // [attr: value; attr: value]
-            // [attr: value; attr]
-            if (stream.match(keyValueAttributesRegexp)) {
-                return "attribute"
-            }
-
-            // match `[if some ?]`
-            if (stream.match(ifAttributesRegexp)) {
-                return "attribute"
-            }
+        // #[track_caller]
+        // #[align(5)]
+        if (ch === "#" && stream.peek() == "[") {
+            stream.match(/^[^\]]*]/)
+            return "attribute"
         }
 
         if (/[\d.]/.test(ch)) {
@@ -261,17 +211,8 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
             return "operator"
         }
 
-        if (ch === "@") {
-            eatIdentifier(stream)
-            return "at-identifier"
-        }
-
         if (ch === "$") {
-            const ident = eatIdentifier(stream).slice(1)
-            if (keywords.has(ident)) {
-                return "keyword"
-            }
-
+            eatIdentifier(stream)
             return "compile-time-identifier"
         }
 
@@ -285,12 +226,16 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
         }
 
         if (keywords.has(cur)) return "keyword"
+
+        if (cur == "map" && stream.peek() == "[") {
+            return "keyword"
+        }
+
         if (pseudoKeywords.has(cur)) return "keyword"
         if (atoms.has(cur)) return "atom"
-        if (hashDirectives.has(cur)) return "hash-directive"
 
         if (!wasDot) {
-            // don't highlight `foo.int()`
+            // don't highlight `foo.i32()`
             //                      ^^^ as builtin
             if (builtinTypes.has(cur)) return "builtin"
         }
@@ -353,41 +298,10 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
         return state.tokenize(stream, state)
     }
 
-    function tokenShortInterpolation(stream: StringStream, state: ModeState) {
-        const ch = stream.next()
-        if (ch === " ") {
-            state.tokenize = tokenString(state.context.stringQuote)
-            return state.tokenize(stream, state)
-        }
-        if (ch === ".") {
-            return "operator"
-        }
-
-        const ident = eatIdentifier(stream)
-        if (ident[0].toLowerCase() === ident[0].toUpperCase()) {
-            state.tokenize = tokenString(state.context.stringQuote)
-            return state.tokenize(stream, state)
-        }
-
-        const next = stream.next()
-        stream.backUp(1)
-        if (next === ".") {
-            state.tokenize = tokenShortInterpolation
-        } else {
-            state.tokenize = tokenString(state.context.stringQuote)
-        }
-
-        return "variable"
-    }
-
     function tokenNextInterpolation(stream: StringStream, state: ModeState) {
         let next = stream.next()
         if (next === "$" && stream.eat("{")) {
             state.tokenize = tokenLongInterpolation
-            return "start-interpolation"
-        }
-        if (next === "$") {
-            state.tokenize = tokenShortInterpolation
             return "start-interpolation"
         }
 
@@ -427,11 +341,6 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
                 if (next === "$" && !escaped && stream.eat("{")) {
                     state.tokenize = tokenNextInterpolation
                     stream.backUp(2)
-                    return "string"
-                }
-                if (next === "$" && !escaped) {
-                    state.tokenize = tokenNextInterpolation
-                    stream.backUp(1)
                     return "string"
                 }
                 if (escaped && isValidEscapeChar(next)) {
@@ -577,4 +486,4 @@ CodeMirror.defineMode("v", (config: EditorConfiguration): Mode<ModeState> => {
 })
 
 // @ts-ignore
-CodeMirror.defineMIME("text/x-v", "v")
+CodeMirror.defineMIME("text/x-spawn", "spawn")
