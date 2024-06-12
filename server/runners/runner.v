@@ -144,6 +144,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
 		 --wall-time=${wall_time_in_seconds}
+		 -p
 		 --run
 		 --
 
@@ -159,8 +160,6 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		return error(prettify(build_output))
 	}
 
-println('Trying to run')
-
 	run_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
@@ -172,6 +171,7 @@ println('Trying to run')
 		 --mem=${max_run_memory_in_kb}
 		 --time=${run_time_in_seconds}
 		 --wall-time=${wall_time_in_seconds}
+		 -p
 		 --run
 		 -- ./out ${prepare_user_arguments(snippet.run_arguments)}
 	')
