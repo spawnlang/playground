@@ -40,6 +40,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 		 --box-id=${box_id}
 		 --dir=${spawn_root}
 		 --env=HOME=/box
+		 --env=SPAWN_ROOT
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
 		 --wall-time=${wall_time_in_seconds}
@@ -63,6 +64,7 @@ pub fn get_output(snippet models.CodeStorage) !string {
 		 --box-id=${box_id}
 		 --dir=${spawn_root}
 		 --env=HOME=/box
+		 --env=SPAWN_ROOT
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_run_memory_in_kb}
 		 --time=${run_time_in_seconds}
@@ -111,6 +113,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 			--box-id=${box_id}
 			--dir=${spawn_root}
 			--env=HOME=/box
+			--env=SPAWN_ROOT
 			--processes=${max_run_processes_and_threads}
 			--mem=${max_compiler_memory_in_kb}
 			--wall-time=${wall_time_in_seconds}
@@ -136,6 +139,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --box-id=${box_id}
 		 --dir=${spawn_root}
 		 --env=HOME=/box
+		 --env=SPAWN_ROOT
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
 		 --wall-time=${wall_time_in_seconds}
@@ -159,6 +163,7 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --box-id=${box_id}
 		 --dir=${spawn_root}
 		 --env=HOME=/box
+		 --env=SPAWN_ROOT
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_run_memory_in_kb}
 		 --time=${run_time_in_seconds}
