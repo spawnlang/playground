@@ -140,13 +140,14 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --env=SPAWN_ROOT
+		 --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_compiler_memory_in_kb}
 		 --wall-time=${wall_time_in_seconds}
 		 --run
 		 --
 
-		${spawn_path} --show-timings false
+		${spawn_path} --use-random-c-file --show-timings false
 		${prepare_user_arguments(snippet.build_arguments)}
 		${file}
 	')
@@ -158,20 +159,21 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		return error(prettify(build_output))
 	}
 
+println('Trying to run')
+
 	run_res := isolate.execute('
 		isolate
 		 --box-id=${box_id}
 		 --dir=${spawn_root}
 		 --env=HOME=/box
 		 --env=SPAWN_ROOT
+		 --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 		 --processes=${max_run_processes_and_threads}
 		 --mem=${max_run_memory_in_kb}
 		 --time=${run_time_in_seconds}
 		 --wall-time=${wall_time_in_seconds}
 		 --run
-		 --
-		 ./out
-		 ${prepare_user_arguments(snippet.run_arguments)}
+		 -- ./out ${prepare_user_arguments(snippet.run_arguments)}
 	')
 
 	is_reached_resource_limit := run_res.exit_code == 1
