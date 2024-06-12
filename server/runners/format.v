@@ -2,7 +2,6 @@ module runners
 
 import os
 import isolate
-import v.tests.local
 
 pub fn format_code(code string) !string {
 	box_path, box_id := isolate.init_sandbox()

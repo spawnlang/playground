@@ -4,7 +4,6 @@ import os
 import logger
 import isolate
 import models
-import term
 
 pub fn retrieve_cgen_code(snippet models.CodeStorage) !(string, int, string) {
 	box_path, box_id := isolate.init_sandbox()
