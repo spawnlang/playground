@@ -1,0 +1,36 @@
+services:
+  playground:
+    image: spawnlang/playground:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # NOTE: `privileged=true`and `pid=host` are required for `firejail` sandbox to work properly.
+    privileged: true
+    pid: host
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    volumes:
+      - playground:/playground/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
+    # NOTE: this values where selected because of current VM that runs playground.
+    deploy:
+      resources:
+        limits:
+          cpus: '0.70'
+          memory: '1512M'
+        reservations:
+          cpus: '0.25'
+          memory: '512M'
+
+volumes:
+  playground:

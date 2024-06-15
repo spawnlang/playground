@@ -1,14 +1,14 @@
 module runners
 
 import os
-import isolate
 import models
 import logger
 import srackham.pcre2
+import sandbox
 
 pub struct RunResult {
 pub:
-	output       string
+	run_output   string
 	build_output string
 }
 
@@ -24,179 +24,103 @@ pub fn test(snippet models.CodeStorage) !RunResult {
 
 // get_output run the code in sandbox and returns the output.
 pub fn get_output(snippet models.CodeStorage) !string {
-	box_path, box_id := isolate.init_sandbox()
+	sandbox_folder_path := sandbox.create_sandbox_folder()
+
 	defer {
-		isolate.execute('isolate --box-id=${box_id} --cleanup')
+		os.rmdir_all(sandbox_folder_path) or { panic(err) }
 	}
 
-	file := 'main.sp'
+	code_file_name := 'main.sp'
+	code_file_path := os.join_path(sandbox_folder_path, code_file_name)
 
-	os.write_file(os.join_path(box_path, file), snippet.code) or {
+	os.write_file(code_file_path, snippet.code) or {
 		return error('Failed to write code to sandbox.')
 	}
 
-	build_res := isolate.execute('
-		isolate
-		 --box-id=${box_id}
-		 --dir=${spawn_root}
-		 --env=HOME=/box
-		 --env=SPAWN_ROOT
-		 --processes=${max_run_processes_and_threads}
-		 --mem=${max_compiler_memory_in_kb}
-		 --wall-time=${wall_time_in_seconds}
-		 --run
-		 --
+	executable_file_path := os.join_path(sandbox_folder_path, 'out')
 
-		${spawn_path} -g
-		${prepare_user_arguments(snippet.build_arguments)}
-		${file}
-	')
-	build_output := build_res.output.trim_right('\n')
+	build_result := sandbox.build_code_in_sandbox(executable_file_path, '${prepare_user_arguments(snippet.build_arguments)} -g',
+		code_file_path)
+
+	build_output := build_result.output.trim_right('\n')
 
 	logger.log(snippet.code, build_output) or { eprintln('[WARNING] Failed to log code.') }
 
-	if build_res.exit_code != 0 {
+	if build_result.exit_code != 0 {
 		return error(prettify(build_output))
 	}
 
-	run_res := isolate.execute('
-		isolate
-		 --box-id=${box_id}
-		 --dir=${spawn_root}
-		 --env=HOME=/box
-		 --env=SPAWN_ROOT
-		 --processes=${max_run_processes_and_threads}
-		 --mem=${max_run_memory_in_kb}
-		 --time=${run_time_in_seconds}
-		 --wall-time=${wall_time_in_seconds}
-		 --run
-		 --
-		 ./code
-		 ${prepare_user_arguments(snippet.run_arguments)}
-	')
+	run_result := sandbox.run_in_sandbox(executable_file_path, prepare_user_arguments(snippet.run_arguments))
 
-	is_reached_resource_limit := run_res.exit_code == 1
-		&& run_res.output.contains('Resource temporarily unavailable')
-	is_out_of_memory := run_res.exit_code == 1
-		&& run_res.output.contains('GC Warning: Out of Memory!')
+	// NOTE: timeout command returns code 124 when it killed too long-running program.
+	is_reached_resource_limit := run_result.exit_code == 124
+
+	is_out_of_memory := run_result.exit_code != 0
+		&& run_result.output.contains('GC Warning: Out of Memory!')
 
 	if is_reached_resource_limit || is_out_of_memory {
 		return error('The program reached the resource limit assigned to it.')
 	}
 
-	mut run_res_result := run_res.output.trim_right('\n')
-	$if !local ? {
-		// isolate output message like "OK (0.033 sec real, 0.219 sec wall)"
-		// so we need to remove it
-		run_res_result = run_res_result.all_before_last('\n') + '\n'
-	}
-
-	return run_res_result
+	return run_result.output.trim_right('\n')
 }
 
 // run_in_sandbox is common function for running tests and code in sandbox.
 fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
-	box_path, box_id := isolate.init_sandbox()
+	sandbox_folder_path := sandbox.create_sandbox_folder()
+
 	defer {
-		isolate.execute('isolate --box-id=${box_id} --cleanup')
+		os.rmdir_all(sandbox_folder_path) or { panic(err) }
 	}
 
-	file := if as_test { 'main_test.sp' } else { 'main.sp' }
+	code_file_name := if as_test { 'main_test.sp' } else { 'main.sp' }
+	code_file_path := os.join_path(sandbox_folder_path, code_file_name)
 
-	os.write_file(os.join_path(box_path, file), snippet.code.replace('\r', '')) or {
+	os.write_file(code_file_path, snippet.code.replace('\r', '')) or {
 		return error('Failed to write code to sandbox.')
 	}
 
 	if as_test {
-		run_res := isolate.execute('
-			isolate
-			--box-id=${box_id}
-			--dir=${spawn_root}
-			--env=HOME=/box
-			--env=SPAWN_ROOT
-			--processes=${max_run_processes_and_threads}
-			--mem=${max_compiler_memory_in_kb}
-			--wall-time=${wall_time_in_seconds}
-			--run
-			--
+		run_result := sandbox.run_tests_in_sandbox(prepare_user_arguments(snippet.build_arguments),
+			code_file_path)
 
-			${spawn_path} --show-timings false
-			${prepare_user_arguments(snippet.build_arguments)}
-			--test ${file}
-		')
-		run_output := run_res.output.trim_right('\n')
+		run_output := run_result.output.trim_right('\n')
 
 		logger.log(snippet.code, run_output) or { eprintln('[WARNING] Failed to log code.') }
 
 		return RunResult{
-			output: prettify(run_output)
+			run_output: prettify(run_output)
 			build_output: ''
 		}
 	}
 
-	build_res := isolate.execute('
-		isolate
-		 --box-id=${box_id}
-		 --dir=${spawn_root}
-		 --env=HOME=/box
-		 --env=SPAWN_ROOT
-		 --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-		 --processes=${max_run_processes_and_threads}
-		 --mem=${max_compiler_memory_in_kb}
-		 --wall-time=${wall_time_in_seconds}
-		 -p
-		 --run
-		 --
+	executable_file_path := os.join_path(sandbox_folder_path, 'out')
 
-		${spawn_path} --use-random-c-file --show-timings false
-		${prepare_user_arguments(snippet.build_arguments)}
-		${file}
-	')
-	build_output := build_res.output.trim_right('\n')
+	build_result := sandbox.build_code_in_sandbox(executable_file_path, '${prepare_user_arguments(snippet.build_arguments)} --show-timings false',
+		code_file_path)
+
+	build_output := build_result.output.trim_right('\n')
 
 	logger.log(snippet.code, build_output) or { eprintln('[WARNING] Failed to log code.') }
 
-	if build_res.exit_code != 0 {
+	if build_result.exit_code != 0 {
 		return error(prettify(build_output))
 	}
 
-	run_res := isolate.execute('
-		isolate
-		 --box-id=${box_id}
-		 --dir=${spawn_root}
-		 --env=HOME=/box
-		 --env=SPAWN_ROOT
-		 --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-		 --processes=${max_run_processes_and_threads}
-		 --mem=${max_run_memory_in_kb}
-		 --time=${run_time_in_seconds}
-		 --wall-time=${wall_time_in_seconds}
-		 -p
-		 --run
-		 -- ./out ${prepare_user_arguments(snippet.run_arguments)}
-	')
+	run_result := sandbox.run_in_sandbox(executable_file_path, prepare_user_arguments(snippet.run_arguments))
 
-	is_reached_resource_limit := run_res.exit_code == 1
-		&& run_res.output.contains('Resource temporarily unavailable')
-	is_out_of_memory := run_res.exit_code == 1
-		&& run_res.output.contains('GC Warning: Out of Memory!')
+	// NOTE: timeout command returns code 124 when it killed too long-running program.
+	is_reached_resource_limit := run_result.exit_code == 124
+
+	is_out_of_memory := run_result.exit_code != 0
+		&& run_result.output.contains('GC Warning: Out of Memory!')
 
 	if is_reached_resource_limit || is_out_of_memory {
 		return error('The program reached the resource limit assigned to it.')
 	}
 
-	mut run_res_result := run_res.output.trim_right('\n')
-	mut run_res_result_lines := run_res_result.split_into_lines()
-
-	// isolate output message like "OK (0.033 sec real, 0.219 sec wall)"
-	// we want to remove it
-	if run_res_result_lines.len > 0 && run_res_result_lines.last().starts_with('OK (') {
-		run_res_result_lines = unsafe { run_res_result_lines#[..-1] }
-		run_res_result = run_res_result_lines.join('\n')
-	}
-
 	return RunResult{
-		output: prettify(run_res_result)
+		run_output: prettify(run_result.output.trim_right('\n'))
 		build_output: prettify(build_output)
 	}
 }

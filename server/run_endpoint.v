@@ -22,7 +22,7 @@ fn (mut app Server) run() vweb.Result {
 	}) }
 
 	return app.json(RunResponse{
-		output: res.output
+		output: res.run_output
 		build_output: res.build_output
 	})
 }

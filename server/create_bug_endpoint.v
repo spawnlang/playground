@@ -22,7 +22,7 @@ fn (mut app Server) create_bug_url() vweb.Result {
 
 	output := runners.run(snippet) or {
 		runners.RunResult{
-			output: err.msg()
+			run_output: err.msg()
 		}
 	}
 
@@ -58,7 +58,7 @@ ${code}
 Output:
 
 ```
-${output.output}
+${output.run_output}
 ```
 '.trim_indent())
 

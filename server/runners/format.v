@@ -1,47 +1,31 @@
 module runners
 
 import os
-import isolate
+import sandbox
 
 pub fn format_code(code string) !string {
-	box_path, box_id := isolate.init_sandbox()
+	sandbox_folder_path := sandbox.create_sandbox_folder()
+
 	defer {
-		isolate.execute('isolate --box-id=${box_id} --cleanup')
+		os.rmdir_all(sandbox_folder_path) or { panic(err) }
 	}
 
-	os.write_file(os.join_path(box_path, 'main.sp'), code) or {
-		return error('Failed to write code to sandbox.')
-	}
+	code_file_name := 'main.sp'
+	code_file_path := os.join_path(sandbox_folder_path, code_file_name)
 
-	vfmt_res := isolate.execute('
-		isolate
-		 --box-id=${box_id}
-		 --dir=${spawn_root}
-		 --env=HOME=/box
-		 --processes=3
-		 --mem=100000
-		 --wall-time=2
-		 --run
-		 --
-		 ~/spawnlang/cmd/fmt/sfmt main.sp
-	')
+	os.write_file(code_file_path, code) or { return error('Failed to write code to sandbox.') }
 
-	mut vfmt_output := $if local ? {
-		vfmt_res.output
+	fmt_result := sandbox.format_code_in_sandbox(code_file_path)
+
+	mut fmt_output := $if local ? {
+		fmt_result.output
 	} $else {
-		vfmt_res.output.trim_right('\n')
-	}
-	if vfmt_res.exit_code != 0 {
-		return error(prettify(vfmt_output))
+		fmt_result.output.trim_right('\n')
 	}
 
-	result := $if local ? {
-		vfmt_output
-	} $else {
-		// isolate output message like "OK (0.033 sec real, 0.219 sec wall)"
-		// so we need to remove it
-		vfmt_output.all_before_last('\n') + '\n'
+	if fmt_result.exit_code != 0 {
+		return error(prettify(fmt_output))
 	}
 
-	return result
+	return fmt_output
 }

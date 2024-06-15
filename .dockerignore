@@ -1,0 +1,12 @@
+.idea
+.git
+.github
+docs
+logs
+server/bin
+storage
+www/node_modules
+.gitignore
+docker_compose.yml
+LICENSE
+README.md

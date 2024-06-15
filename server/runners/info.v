@@ -1,16 +1,23 @@
 module runners
 
-import v.util.version
 import os
 
 pub fn get_version() string {
-	return version.full_v_version(true)
+	res := os.execute('spawnlang --version')
+
+	if res.exit_code != 0 {
+		return 'Unknown'
+	}
+
+	return res.output.replace('spawnc', 'Spawn')
 }
 
 pub fn get_doctor_output() !string {
-	res := os.execute('v doctor')
+	res := os.execute('spawnlang doctor')
+
 	if res.exit_code != 0 {
-		return error('v doctor failed, output: ${res.output}')
+		return error('spawnlang doctor failed, output: ${res.output}')
 	}
+
 	return res.output.all_before_last('\n')
 }

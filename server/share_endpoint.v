@@ -36,6 +36,7 @@ fn hash_code_snippet(snippet models.CodeStorage) string {
 	// snippets with the same code but different arguments should be treated as different
 	to_hash := snippet.code + snippet.build_arguments + snippet.run_arguments +
 		snippet.run_configuration.str()
+
 	// using 10 chars is enough for now
 	return md5.hexhash(to_hash)[0..10]
 }

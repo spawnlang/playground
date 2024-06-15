@@ -3,7 +3,6 @@ module main
 import vweb
 import os
 import db.sqlite
-import isolate
 import models
 import flag
 
@@ -61,11 +60,12 @@ fn (mut app Server) get_saved_code(hash string) ?models.CodeStorage {
 
 // init_once initializes the server.
 fn (mut app Server) init_once() {
-	app.db = sqlite.connect('code_storage.db') or { panic(err) }
+	app.db = sqlite.connect('./storage/code_storage.db') or { panic(err) }
+
 	sql app.db {
 		create table models.CodeStorage
 	} or { panic(err) }
-	isolate.execute('isolate --cleanup')
+
 	app.handle_static('./www/public', true)
 	app.serve_static('/', './www/public/')
 }
@@ -76,6 +76,7 @@ fn main() {
 	fp.version('v0.0.1')
 	fp.description('A playground server for Spawn language.')
 	fp.skip_executable()
+
 	port := fp.int('port', `p`, default_port, 'port to run the server on')
 
 	fp.finalize() or {
@@ -86,5 +87,6 @@ fn main() {
 
 	mut app := &Server{}
 	app.init_once()
+
 	vweb.run(app, port)
 }

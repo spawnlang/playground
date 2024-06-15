@@ -8,6 +8,7 @@ fn (mut app Server) shared_code(hash string) vweb.Result {
 	if hash == '' {
 		return app.index()
 	}
+
 	return app.redirect('/?query=${hash}')
 }
 
@@ -26,6 +27,7 @@ fn (mut app Server) get_by_hash() vweb.Result {
 			error: 'No hash was provided.'
 		})
 	}
+
 	snippet := app.get_saved_code(hash.trim_space()) or {
 		return app.json(GetByHashResponse{
 			found: false

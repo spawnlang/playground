@@ -20,6 +20,7 @@ fn (mut app Server) check_output() vweb.Result {
 			error: err.msg()
 		})
 	}
+
 	expected_output := app.form['expected-output'] or {
 		return app.json(CheckOutputResponse{
 			error: 'Expected output is required'
