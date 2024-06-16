@@ -1,6 +1,6 @@
-# Spawn Playground: Run, Edit, Share V Code Online
+# Spawn Playground: Run, Edit, Share Spawn Code Online
 
-The [Spawn Playground](https://play.spawnlang.dev) is a place where you can 
+The [Spawn Playground](https://play.spawnlang.dev) is a place where you can
 run, edit and share Spawn code online.
 
 ![](./docs/images/cover.png)
@@ -11,8 +11,8 @@ run, edit and share Spawn code online.
 - Powerful editor with syntax highlighting and auto-completion
 - Ability to [run code as tests](https://docs.spawnlang.dev/tools/playground.html#test)
 - Ability to [see generated C code](https://docs.spawnlang.dev/tools/playground.html#show-generated-c-code)
-  for passed V code
-- Pass [flags](https://docs.spawnlang.dev/tools/playground.html#pass-arguments-to-compiler) to V
+  for passed Spawn code
+- Pass [flags](https://docs.spawnlang.dev/tools/playground.html#pass-arguments-to-compiler) to Spawn
   compiler and binary
 - [Shareable](https://docs.spawnlang.dev/tools/playground.html#share-code) code and editor state
   via URL or local storage
@@ -46,32 +46,6 @@ then access the playground at <http://localhost:5555>
 
 ```bash
 npm run local-serve
-```
-
-then access the playground at <http://localhost:5555>
-
-### Run the playground locally inside isolate (as on play.spawnlang.dev)
-
-> NOTE: Only works on Linux, since it uses `isolate`.
-
-#### Install Dependencies
-
-> We use isolate to sandbox the playground, so you need to install it first.
-
-```bash
-sudo apt install pkg-config libcap-dev libsystemd-dev
-git clone https://github.com/ioi/isolate /tmp/isolate
-cd /tmp/isolate
-make isolate isolate-check-environment
-make install
-
-sudo apt install libsqlite3-dev
-```
-
-#### Run the server
-
-```bash
-npm run serve
 ```
 
 then access the playground at <http://localhost:5555>
