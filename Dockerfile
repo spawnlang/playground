@@ -23,7 +23,7 @@ WORKDIR /playground
 
 RUN rm -rf ./www/node_modules
 
-FROM spawnlang/spawn:1.0.0
+FROM spawnlang/spawn:1.1.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 

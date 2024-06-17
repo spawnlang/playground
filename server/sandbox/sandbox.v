@@ -17,13 +17,13 @@ const common_sandbox_command = 'timeout ${max_program_run_time_seconds + 1} fire
 --noinput --nonewprivs --novideo --private-cache --private-dev --restrict-namespaces --rlimit-cpu=${max_program_run_time_seconds}
 --rlimit-as=${max_program_virtual_memory_limit_mb}m --rlimit-fsize=${max_program_create_file_limit_mb}m --seccomp --quiet'
 
-const build_code_sandbox_command_template = '${common_sandbox_command} spawnlang --use-random-c-file -o {out_file_path}
+const build_code_sandbox_command_template = '${common_sandbox_command} spawnc --use-random-c-file -o {out_file_path}
 {build_arguments} {code_file_path}'
 
-const run_tests_sandbox_command_template = '${common_sandbox_command} spawnlang --use-random-c-file --show-timings false
+const run_tests_sandbox_command_template = '${common_sandbox_command} spawnc --use-random-c-file --show-timings false
 --test {build_arguments} {code_file_path}'
 
-const run_in_sandbox_command_template = '${common_sandbox_command} --memory-deny-write-execute {executable_path} {run_arguments}'
+const run_in_sandbox_command_template = '${common_sandbox_command} {executable_path} {run_arguments}'
 
 pub fn create_sandbox_folder() string {
 	mut random_folder_name := create_random_folder_name()

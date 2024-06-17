@@ -8,6 +8,8 @@ export class LocalCodeRepository implements CodeRepository {
 
     // language=V
     public static readonly WELCOME_CODE = `
+module main
+
 // Welcome to the Spawn Playground!
 // Here you can edit, run, and share Spawn code.
 // Let's start with a simple "Hello, Playground!" example:

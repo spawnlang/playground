@@ -15,38 +15,43 @@ export const examples: IExample[] = [
     },
     {
         name: "String interpolation",
-        // language=V
         code: `
-// In V you can define array of string with the following syntax:
-areas := ['game', 'web', 'tools', 'science', 'systems', 'embedded', 'drivers', 'GUI', 'mobile']
+module main
 
-for area in areas {
-    // V uses the \${} notation to interpolate a variable
+fn main() {
+    // In Spawn you can define array of string with the following syntax:
+    users := ['John', 'Ania', 'Patrik', 'Jannie']
+
+    // Spawn uses the \${} notation to interpolate a variable
     // or expression right on the string.
     // Learn more about string interpolation in the documentation:
     // https://docs.spawnlang.dev/concepts/types/strings.html#string-interpolation
-    println('Hello, \${area} developers!')
+    for user in users {
+        println('Hello, \${user}!')
+    }
 }
-        `,
+`,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "Fibonacci",
-        // language=v
         code: `
-// As in other languages, you can define functions in V.
+module main
+
+// As in other languages, you can define functions in Spawn.
 // Learn more about functions in the documentation:
 // https://docs.spawnlang.dev/concepts/functions/overview.html
-fn fib(n int) u64 {
+fn fib(n i32) -> u64 {
     // To define a array of specific type, use the following syntax.
     // Here we define an array of int with the length of n + 2.
     // Learn more about arrays in the documentation:
     // https://docs.spawnlang.dev/concepts/types/arrays.html
     mut f := []u64{len: n + 2}
+
     f[0] = 0
     f[1] = 1
 
-    for i := 2; i <= n; i++ {
+    for i in 2 ..= n {
         f[i] = f[i - 1] + f[i - 2]
     }
 
@@ -66,76 +71,95 @@ fn main() {
     },
     {
         name: "Structs and embedded structs",
-        // language=V format=false
         code: `
+module main
+
 // Structs are a way to define a new type with a set of fields.
-// You can define a struct with the following syntax:
+// You can define a struct with the following syntax.
 // Learn more about structs in the documentation:
 // https://docs.spawnlang.dev/concepts/structs/overview.html
 struct Size {
-// mut keyword is used to define mutable fields
-// pub keyword is used to define public fields
-//
-// By default, all fields are private and immutable.
-pub mut:
-    width  int
-    height int
+    width  i32
+    height i32
 }
 
 // Structs can have methods.
-fn (s &Size) area() int {
+fn (s &Size) area() -> i32 {
     return s.width * s.height
 }
 
 // Structs can be embedded in other structs.
+// Conceptually, embedded structs are similar to composition in OOP, not base classes.
 struct Button {
     Size
+
     title string
 }
 
-mut button := Button{
-    title: 'Click me'
-    height: 2
+fn main() {
+    mut button := Button{
+        title: 'Click me'
+        height: 2
+    }
+
+    button.width = 3
+
+    // With embedding, the struct Button will automatically have get all the
+    // fields and methods from the struct Size, which allows you to do:
+    assert button.area() == 6
+
+    // If you need to access embedded structs directly, use an explicit
+    // reference like \`button.Size\`:
+    assert button.Size.area() == 6
+
+    print(button)
 }
-
-button.width = 3
-
-// With embedding, the struct Button will automatically have get all the
-// fields and methods from the struct Size, which allows you to do:
-assert button.area() == 6
-// If you need to access embedded structs directly, use an explicit
-// reference like \`button.Size\`:
-assert button.Size.area() == 6
-// Conceptually, embedded structs are similar to mixins in OOP, not base classes.
-
-print(button)
 `,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "Sum types",
-        // language=V
         code: `
+module main
+
 struct Empty {}
 
 struct Node {
     value f64
-    left  Tree
-    right Tree
+    left  &Tree
+    right &Tree
 }
 
 // Sum types are a way to define a type that can be one of several types.
-// In V, sum types are defined with following syntax.
+// In Spawn, sum types are defined with following syntax.
 // Learn more about sum types in the documentation:
 // https://docs.spawnlang.dev/concepts/sum-types.html
-type Tree = Empty | Node
+union Tree = Empty | Node
 
 // Let's calculate the sum of all values in the tree.
 fn main() {
+    left := Node{
+        value: 0.2
+        left: &(Empty{} as Tree)
+        right: &(Empty{} as Tree)
+    }
+
+    right := Node{
+        value: 0.3
+        left: &(Empty{} as Tree)
+        right: &(Node{
+            value: 0.4
+            left: &(Empty{} as Tree)
+            right: &(Empty{} as Tree)
+        } as Tree)
+    }
+
     // Here we just define a tree with some values.
-    left := Node{0.2, Empty{}, Empty{}}
-    right := Node{0.3, Empty{}, Node{0.4, Empty{}, Empty{}}}
-    tree := Node{0.5, left, right}
+    tree := Node{
+        value: 0.5
+        left: &(left as Tree)
+        right: &(right as Tree)
+    }
 
     // And call the sum function.
     // Since the sum function accepts a Tree, we can pass it any of the
@@ -145,15 +169,16 @@ fn main() {
 }
 
 // sum up all node values
-fn sum(tree Tree) f64 {
-    // In V, you can use \`match\` expression to match a value against a sum type.
+fn sum(tree Tree) -> f64 {
+    // In Spawn, you can use \`match\` expression to match a value against a sum type.
     // Learn more about match expression in the documentation:
     // https://docs.spawnlang.dev/concepts/control-flow/conditions.html#match-expression
     return match tree {
         // if the value has type Empty, return 0
-        Empty { 0 }
+        Empty -> 0
+
         // if the value has type Node, return the sum of the node value and the sum of the left and right subtrees
-        Node { tree.value + sum(tree.left) + sum(tree.right) }
+        Node -> tree.value + sum(*tree.left) + sum(*tree.right)
     }
 }
 `,
@@ -161,15 +186,16 @@ fn sum(tree Tree) f64 {
     },
     {
         name: "Generics",
-        // language=V
         code: `
+module main
+
 // Sometimes there may be situations where you need code that will
 // work in the same way for different types.
 //
 // For example, in this example, we are creating a \`List\` that will
 // be able to store elements of any type while maintaining type safety.
 //
-// In V, to define a generic structure, you need to write the generic parameters
+// In Spawn, to define a generic structure, you need to write the generic parameters
 // in square brackets after name.
 // There may be one or more of them, each of them must be named with a
 // single capital letter.
@@ -177,7 +203,6 @@ fn sum(tree Tree) f64 {
 // Learn more about generics in the documentation:
 // https://docs.spawnlang.dev/concepts/generics.html
 struct List[T] {
-mut:
     data []T
 }
 
@@ -185,23 +210,27 @@ mut:
 // return the type with which the structure was created.
 //
 // That is, for each \`List\` with a specific type, its own copy of this structure
-// will be created when V compile code.
+// will be created when Spawn compile code.
 //
 // This means that if you call push on a \`List[int]\`, then the \`push()\` function will
 // take an int argument.
 fn (mut l List[T]) push(val T) {
-    l.data << val
+    l.data.push(val)
 }
 
 // Here everything is the same as with \`push()\`, however, for \`List[int]\` the function
 // will return an int value, and not accept it.
-fn (l &List[T]) pop() T {
+fn (l &List[T]) pop() -> T {
     return l.data.last()
 }
 
-// In V, there can be not only structures, but also functions, so the following function
+fn (l List[T]) str() -> string {
+    return l.data.str()
+}
+
+// In Spawn, there can be not only structures, but also functions, so the following function
 // creates a generic structure with the type passed to the function.
-fn list_of[T]() List[T] {
+fn list_of[T]() -> List[T] {
     return List[T]{}
 }
 
@@ -233,49 +262,52 @@ fn main() {
     bool_list.push(true)
     println(bool_list)
 }
-        `,
+`,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "Concurrency",
-        // language=V
         code: `
-// V's model of concurrency is going to be very similar to Go's.
 // Learn more about concurrency in the documentation:
 // https://docs.spawnlang.dev/concepts/concurrency.html
-import time
+module main
 
-fn task(id int, duration int) {
+import time
+import runtime
+
+fn task(id i32, duration u64) {
     println('task \${id} begin')
-    time.sleep(duration * time.millisecond)
+    time.sleep(duration * time.MILLISECOND)
     println('task \${id} end')
 }
 
 fn main() {
-    // []thread is a special type that represents an array of threads
-    mut threads := []thread{}
+    // []runtime.Handle[unit] is a special type that represents an array of threads in our case
+    mut threads := []&runtime.Handle[unit]{}
 
-    // \`spawn\` starts a new thread and returns a \`thread\` object
+    // \`spawn\` starts a new thread and returns a \`runtime.Handle[unit]\` object
     // that can be added in thread array.
-    threads << spawn task(1, 500)
-    threads << spawn task(2, 900)
-    threads << spawn task(3, 100)
+    threads.push(spawn task(1, 500))
+    threads.push(spawn task(2, 900))
+    threads.push(spawn task(3, 100))
 
-    // \`wait\` is special function that waits for all threads to finish.
-    threads.wait()
+    for thread in threads {
+        thread.join()
+    }
 
     println('done')
 }
-        `,
+`,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "Channel Select",
-        // language=V
         code: `
-// Channels in V very similar to Go's channels.
+// Channels in Spawn very similar to Go's channels.
 // Learn more about channels in the documentation:
 // https://docs.spawnlang.dev/concepts/concurrency.html#channels
+module main
+
 import time
 
 fn main() {
@@ -289,13 +321,13 @@ fn main() {
 
     // Setup spawn threads that will send on ch/ch2.
     spawn fn (the_channel chan f64) {
-        time.sleep(5 * time.millisecond)
+        time.sleep(5 * time.MILLISECOND)
         // You can push value to channel...
         the_channel <- 1.0
     }(ch)
 
     spawn fn (the_channel chan f64) {
-        time.sleep(1 * time.millisecond)
+        time.sleep(1 * time.MILLISECOND)
         // ...in different threads.
         the_channel <- 1.0
     }(ch2)
@@ -303,53 +335,46 @@ fn main() {
     spawn fn (the_channel chan f64) {
         // And read values from channel in other threads
         // If channel is empty, the thread will wait until a value is pushed to it.
-        _ := <-the_channel
+        _ = <-the_channel
     }(ch3)
 
     // Select is powerful construct that allows you to work for multiple channels.
     // Learn more about select in the documentation:
     // https://docs.spawnlang.dev/concepts/concurrency.html#channel-select
     select {
-        a := <-ch {
-            // do something with \`a\`
-            eprintln('> a: \${a}')
-        }
-        b = <-ch2 {
-            // do something with predeclared variable \`b\`
-            eprintln('> b: \${b}')
-        }
-        ch3 <- c {
+        a := <-ch => eprintln('> a: \${a}')
+        b = <-ch2 => eprintln('> b: \${b}')
+        ch3 <- c => {
             // do something if \`c\` was sent
-            time.sleep(5 * time.millisecond)
+            time.sleep(5 * time.MILLISECOND)
             eprintln('> c: \${c} was sent on channel ch3')
         }
-        500 * time.millisecond {
-            // do something if no channel has become ready within 0.5s
-            eprintln('> more than 0.5s passed without a channel being ready')
-        }
+        500 * time.MILLISECOND => eprintln('> more than 0.5s passed without a channel being ready')
     }
+
     eprintln('> done')
 }
-        `,
+
+`,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "JSON Encoding/Decoding",
-        // language=v
         code: `
-// V very modular and has a lot of built-in modules.
+// Spawn very modular and has a lot of built-in modules.
 // In this example we will use the json module to encode and decode JSON data.
 // If you want to learn more about modules, visit
 // https://docs.spawnlang.dev/concepts/modules/overview.html
+module main
+
 import json
 
-// Since V is statically typed, we need to define a struct to hold the data.
+// Since Spawn is statically typed, we need to define a struct to hold the data.
 // Learn more about structs in the documentation:
 // https://docs.spawnlang.dev/concepts/structs/overview.html
 struct User {
     name string
-    age  int
-mut:
+    age  i32
     // We can use the \`mut\` keyword to make the field mutable.
     // Without it, there is no way to change the field value.
     is_registered bool
@@ -360,14 +385,14 @@ fn main() {
 
     // json.decode() is special function that can decode JSON data.
     // It takes a type and a json data as arguments and returns a value of passed type.
-    // V tries to decode the data as the passed type. For example, if you pass []User,
+    // Spawn tries to decode the data as the passed type. For example, if you pass []User,
     // it will try to decode the data as an array of User.
     //
     // In this case it will return an array of User.
     //
     // Learn more about the json module in the documentation:
     // https://docs.spawnlang.dev/concepts/working-with-json.html
-    mut users := json.decode([]User, json_data) or {
+    mut users := json.decode[[]User](json_data) or {
         // But if the json data is invalid, it will return an error.
         // You can handle it with the 'or {}' syntax as in this example.
         //
@@ -407,7 +432,7 @@ fn main() {
     println(encoded_data)
 }
 
-fn (u User) can_register() bool {
+fn (u User) can_register() -> bool {
     return u.age >= 16
 }
 
@@ -429,34 +454,39 @@ fn (mut u User) register() {
     },
     {
         name: "Filter Log file",
-        // language=v
         code: `
 // Print file lines that start with "DEBUG:"
+module main
+
 import os
 
-// \`write_file\` returns a result (\`!\`), it must be checked
-os.write_file('app.log', '
+fn main() {
+    // \`write_file\` returns a result (\`!\`), it must be checked
+    os.write_file('app.log', '
 ERROR: log file not found
 DEBUG: create new file
 DEBUG: write text to log file
 ERROR: file not writeable
 ') or {
-    // \`err\` is a special variable that contains the error
-    // in \`or {}\` blocks
-    eprintln('failed to write the file: \${err}')
-    return
-}
+        // \`err\` is a special variable that contains the error
+        // in \`or {}\` blocks
+        eprintln('failed to write the file: \${err}')
+        return
+    }
 
-// \`read_file\` returns a result (\`!string\`), it must be checked
-text := os.read_file('app.log') or {
-    eprintln('failed to read the file: \${err}')
-    return
-}
+    // \`read_file\` returns a result (\`!string\`), it must be checked
+    text := os.read_file('app.log') or {
+        eprintln('failed to read the file: \${err}')
+        return
+    }
 
-lines := text.split_into_lines()
-for line in lines {
-    if line.starts_with('DEBUG:') {
-        println(line)
+    // Sse \`clone\` to create a copy of every line, because by default \`split_into_lines\` returns not null terminated strings
+    lines := text.trim_spaces().split_into_lines().clone()
+
+    for line in lines {
+        if line.starts_with('DEBUG:') {
+            println(line)
+        }
     }
 }
 
@@ -470,10 +500,13 @@ for line in lines {
         name: "Compile-time Reflection",
         code: `
 // https://docs.spawnlang.dev/concepts/compile-time/reflection.html
+module main
+
+import reflection
 
 struct User {
     name string
-    age  int
+    age  i32
 }
 
 fn main() {
@@ -482,33 +515,36 @@ fn main() {
     println(user)
 }
 
-fn decode[T](data string) T {
+fn decode[T: reflection.Struct](data string) -> T {
     mut result := T{}
+
     // compile-time \`for\` loop
     // T.fields gives an array of a field metadata type
     $for field in T.fields {
         $if field.typ is string {
             // $(string_expr) produces an identifier
             result.$(field.name) = get_string(data, field.name)
-        } $else $if field.typ is int {
+        } $else $if field.typ is i32 {
             result.$(field.name) = get_int(data, field.name)
         }
     }
+
     return result
 }
 
-fn get_string(data string, field_name string) string {
+fn get_string(data string, field_name string) -> string {
     for line in data.split_into_lines() {
         key_val := line.split('=')
         if key_val[0] == field_name {
             return key_val[1]
         }
     }
+
     return ''
 }
 
-fn get_int(data string, field string) int {
-    return get_string(data, field).int()
+fn get_int(data string, field string) -> i32 {
+    return get_string(data, field).i32()
 }
 
 // \`decode[User]\` generates:
@@ -523,19 +559,19 @@ fn get_int(data string, field string) int {
     },
     {
         name: "Anonymous & higher order functions",
-        // language=V
         code: `
 // https://docs.spawnlang.dev/concepts/functions/anonymous-and-higher-order-functions.html
+module main
 
-fn sqr(n int) int {
+fn sqr(n i32) -> i32 {
     return n * n
 }
 
-fn cube(n int) int {
+fn cube(n i32) -> i32 {
     return n * n * n
 }
 
-fn run(value int, op fn (int) int) int {
+fn run(value i32, op fn (n i32) -> i32) -> i32 {
     return op(value)
 }
 
@@ -549,39 +585,43 @@ fn main() {
     println(run(5, sqr)) // "25"
 
     // Anonymous functions can be declared inside other functions:
-    double_fn := fn (n int) int {
+    double_fn := fn (n i32) -> i32 {
         return n + n
     }
+
     println(run(5, double_fn)) // "10"
 
     // Functions can be passed around without assigning them to variables:
-    res := run(5, fn (n int) int {
+    res := run(5, fn (n i32) -> i32 {
         return n + n
     })
+
     println(res) // "10"
 
     // You can even have an array/map of functions:
     fns := [sqr, cube]
-    println(fns[0](10)) // "100"
+    println((fns[0])(10)) // "100"
 
     fns_map := {
         'sqr':  sqr
         'cube': cube
     }
-    println(fns_map['cube'](2)) // "8"
+
+    println((fns_map['cube'])(2)) // "8"
 }
 `,
         runConfiguration: RunConfigurationType.Run
     },
     {
         name: "Testing",
-        // language=V
         code: `
-// Tests in V is very simple.
-// To define a test function, just add \`test_\` prefix to the function name.
+// Tests in Spawn is very simple.
+// To define a test function, use \`test "<test_name_here>" {}\` construction.
 // Learn more about testing in the documentation:
 // https://docs.spawnlang.dev/concepts/testing.html
-fn test_hello() {
+module main
+
+test "Hello test" {
     // Inside test functions you can use \`assert\` to check if the result is correct.
     assert hello() == 'Hello world'
 
@@ -591,13 +631,13 @@ fn test_hello() {
 }
 
 // Other functions can be used in tests too.
-fn hello() string {
+fn hello() -> string {
     return 'Hello world'
 }
 
-fn sum(a int, b int) int {
-	// oops, this should be \`a + b\`
-	return a - b
+fn sum(a i32, b i32) -> i32 {
+    // oops, this should be \`a + b\`
+    return a - b
 }
 `,
         runConfiguration: RunConfigurationType.Test
@@ -610,7 +650,6 @@ fn sum(a int, b int) int {
     return example
 })
 
-// language=V
 export const codeIfSharedLinkBroken = `
 // Oops, the shared link is broken.
 // Please recheck the link and try again.
