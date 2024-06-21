@@ -84,6 +84,19 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		run_result := sandbox.run_tests_in_sandbox(prepare_user_arguments(snippet.build_arguments),
 			code_file_path)
 
+		// NOTE: timeout command returns code 124 when it killed too long-running program.
+		if run_result.exit_code == 124 {
+			return error('The program reached the run time limit assigned to it.')
+		}
+
+		if run_result.exit_code != 0 && run_result.output.contains('GC Warning: Out of Memory!') {
+			return error('The program reached the RAM limit assigned to it.')
+		}
+
+		if run_result.exit_code != 0 {
+			return error('The program failed with exit code ${run_result.exit_code}.\n${prettify(run_result.output)}')
+		}
+
 		run_output := run_result.output.trim_right('\n')
 
 		logger.log(snippet.code, run_output) or { eprintln('[WARNING] Failed to log code.') }
@@ -110,13 +123,16 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 	run_result := sandbox.run_in_sandbox(executable_file_path, prepare_user_arguments(snippet.run_arguments))
 
 	// NOTE: timeout command returns code 124 when it killed too long-running program.
-	is_reached_resource_limit := run_result.exit_code == 124
+	if run_result.exit_code == 124 {
+		return error('The program reached the run time limit assigned to it.')
+	}
 
-	is_out_of_memory := run_result.exit_code != 0
-		&& run_result.output.contains('GC Warning: Out of Memory!')
+	if run_result.exit_code != 0 && run_result.output.contains('GC Warning: Out of Memory!') {
+		return error('The program reached the RAM limit assigned to it.')
+	}
 
-	if is_reached_resource_limit || is_out_of_memory {
-		return error('The program reached the resource limit assigned to it.')
+	if run_result.exit_code != 0 {
+		return error('The program failed with exit code ${run_result.exit_code}.\n${prettify(run_result.output)}')
 	}
 
 	return RunResult{
