@@ -5,6 +5,7 @@ import models
 import logger
 import srackham.pcre2
 import sandbox
+import benchmark
 
 pub struct RunResult {
 pub:
@@ -84,6 +85,19 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		run_result := sandbox.run_tests_in_sandbox(prepare_user_arguments(snippet.build_arguments),
 			code_file_path)
 
+		// NOTE: timeout command returns code 124 when it killed too long-running program.
+		if run_result.exit_code == 124 {
+			return error('The program reached the run time limit assigned to it.')
+		}
+
+		if run_result.exit_code != 0 && run_result.output.contains('GC Warning: Out of Memory!') {
+			return error('The program reached the RAM limit assigned to it.')
+		}
+
+		if run_result.exit_code != 0 {
+			return error('The program failed with exit code ${run_result.exit_code}.\n${prettify(run_result.output)}')
+		}
+
 		run_output := run_result.output.trim_right('\n')
 
 		logger.log(snippet.code, run_output) or { eprintln('[WARNING] Failed to log code.') }
@@ -96,8 +110,12 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 
 	executable_file_path := os.join_path(sandbox_folder_path, 'out')
 
+	mut compilation_timer := benchmark.start()
+
 	build_result := sandbox.build_code_in_sandbox(executable_file_path, '${prepare_user_arguments(snippet.build_arguments)} --show-timings false',
 		code_file_path)
+
+	compilation_timer.stop()
 
 	build_output := build_result.output.trim_right('\n')
 
@@ -107,21 +125,30 @@ fn run_in_sandbox(snippet models.CodeStorage, as_test bool) !RunResult {
 		return error(prettify(build_output))
 	}
 
+	mut run_timer := benchmark.start()
+
 	run_result := sandbox.run_in_sandbox(executable_file_path, prepare_user_arguments(snippet.run_arguments))
 
+	run_timer.stop()
+
 	// NOTE: timeout command returns code 124 when it killed too long-running program.
-	is_reached_resource_limit := run_result.exit_code == 124
+	if run_result.exit_code == 124 {
+		return error('The program reached the run time limit assigned to it.')
+	}
 
-	is_out_of_memory := run_result.exit_code != 0
-		&& run_result.output.contains('GC Warning: Out of Memory!')
+	if run_result.exit_code != 0 && run_result.output.contains('GC Warning: Out of Memory!') {
+		return error('The program reached the RAM limit assigned to it.')
+	}
 
-	if is_reached_resource_limit || is_out_of_memory {
-		return error('The program reached the resource limit assigned to it.')
+	if run_result.exit_code != 0 {
+		return error('The program failed with exit code ${run_result.exit_code}.\n${prettify(run_result.output)}')
 	}
 
 	return RunResult{
-		run_output: prettify(run_result.output.trim_right('\n'))
-		build_output: prettify(build_output)
+		run_output: prettify(run_result.output.trim_right('\n')) +
+			'\n\nRun time: ${run_timer.total_duration()}ms'
+		build_output: prettify(build_output) +
+			'\n\nCompilation time: ${compilation_timer.total_duration()}ms'
 	}
 }
 

@@ -3,7 +3,7 @@ module runners
 import os
 
 pub fn get_version() string {
-	res := os.execute('spawnlang --version')
+	res := os.execute('spawnc --version')
 
 	if res.exit_code != 0 {
 		return 'Unknown'
@@ -13,7 +13,7 @@ pub fn get_version() string {
 }
 
 pub fn get_doctor_output() !string {
-	res := os.execute('spawnlang doctor')
+	res := os.execute('spawnc doctor')
 
 	if res.exit_code != 0 {
 		return error('spawnlang doctor failed, output: ${res.output}')

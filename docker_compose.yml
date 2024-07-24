@@ -1,6 +1,6 @@
 services:
   playground:
-    image: spawnlang/playground:1.0.1
+    image: spawnlang/playground:1.1.3
     build:
       context: .
       dockerfile: Dockerfile
@@ -26,11 +26,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.70'
-          memory: '1512M'
-        reservations:
-          cpus: '0.25'
-          memory: '512M'
+          cpus: '1.80'
+          memory: '3584M'
 
 volumes:
   playground:

@@ -13,7 +13,7 @@
     "local-build": "npm run build-ts && npm run mkdir-bin && v -g -d local -d uselibbacktrace -o ./server/bin/server ./server",
     "serve": "npm run build && ./server/bin/server",
     "local-serve": "npm run local-build && ./server/bin/server",
-    "run-docker": "docker-compose -f docker_compose.yml up -d",
+    "run-docker": "docker-compose -f docker_compose.yml up -d --build",
     "clean": "rm -rf ./server/bin"
   },
   "author": {
