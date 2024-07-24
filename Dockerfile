@@ -1,4 +1,4 @@
-FROM spawnlang/vlang:1.0.0 as playground-build
+FROM spawnlang/vlang:1.0.0 AS playground-build
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -23,7 +23,7 @@ WORKDIR /playground
 
 RUN rm -rf ./www/node_modules
 
-FROM spawnlang/spawn:1.1.0
+FROM spawnlang/spawn:1.2.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 

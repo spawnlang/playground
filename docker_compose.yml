@@ -1,6 +1,6 @@
 services:
   playground:
-    image: spawnlang/playground:1.1.2
+    image: spawnlang/playground:1.1.3
     build:
       context: .
       dockerfile: Dockerfile
