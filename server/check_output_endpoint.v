@@ -40,8 +40,7 @@ fn (mut app Server) check_output() vweb.Result {
 		})
 	}
 
-	diff_cmd := diff.find_working_diff_command() or { '' }
-	diff_res := diff.color_compare_strings(diff_cmd, 'output', expected_output, res)
+	diff_res := diff.compare_text(expected_output, res) or { '' }
 
 	return app.json(CheckOutputResponse{
 		output: res
