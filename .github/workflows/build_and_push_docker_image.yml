@@ -44,5 +44,5 @@ jobs:
                   tags: spawnlang/playground:latest, spawnlang/playground:${{ env.CURRENT_COMMIT_SHORT_HASH }}
                   # NOTE: there are few other options for the cache,
                   # see https://docs.docker.com/build/ci/github-actions/cache/#registry-cache
-                  cache-from: type=registry,ref=user/app:latest
+                  cache-from: type=registry,ref=spawnlang/playground:latest
                   cache-to: type=inline
