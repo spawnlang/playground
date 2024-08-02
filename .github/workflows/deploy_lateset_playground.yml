@@ -22,4 +22,4 @@ jobs:
                       cd playground
                       docker compose -f docker_compose.yml pull
                       docker compose -f docker_compose.yml down
-                      docker compose -f docker_compose.yml up -d --build
+                      docker compose -f docker_compose.yml up -d
