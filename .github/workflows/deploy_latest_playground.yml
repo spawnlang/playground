@@ -10,7 +10,7 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
-        # NOTE: deploying Playground on the server is pretty fast (around 1 minute).
+        # NOTE: deploying Playground on the server is pretty fast (around 10 seconds).
         # If this job takes more than 5 minutes, it means that something is wrong.
         timeout-minutes: 5
         steps:
