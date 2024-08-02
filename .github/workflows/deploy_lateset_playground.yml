@@ -1,0 +1,25 @@
+name: Deploy latest Playground to the server
+
+on:
+    workflow_run:
+        workflows: ["Build and push Playground Docker image"]
+        types:
+            - completed
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        steps:
+            - name: Updating Playground
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.PLAYGROUD_SERVER_HOST }}
+                  username: ${{ secrets.PLAYGROUD_SERVER_USERNAME }}
+                  passphrase: ${{ secrets.PLAYGROUD_SERVER_PASSPHRASE }}
+                  key: ${{ secrets.PLAYGROUD_SERVER_SSH_KEY }}
+                  script: |
+                      cd playground
+                      docker compose -f docker_compose.yml pull
+                      docker compose -f docker_compose.yml down
+                      docker compose -f docker_compose.yml up -d --build
