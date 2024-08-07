@@ -1,26 +1,26 @@
-name: Deploy latest Playground on the server
+name: "Deploy latest Playground on the server"
 
 on:
     workflow_run:
         # NOTE: this is the workflow `build_and_push_docker_image.yml`.
         workflows: ["Build and push Playground Docker image"]
         types:
-            - completed
+            - "completed"
 
 jobs:
     deploy:
-        runs-on: ubuntu-latest
+        runs-on: "ubuntu-latest"
         # NOTE: deploying Playground on the server is pretty fast (around 10 seconds).
         # If this job takes more than 5 minutes, it means that something is wrong.
         timeout-minutes: 5
         steps:
-            - name: Deploying Playground on the server
-              uses: appleboy/ssh-action@v1.0.3
+            - name: "Deploying Playground on the server"
+              uses: "appleboy/ssh-action@v1.0.3"
               with:
-                  host: ${{ secrets.PLAYGROUD_SERVER_HOST }}
-                  username: ${{ secrets.PLAYGROUD_SERVER_USERNAME }}
-                  passphrase: ${{ secrets.PLAYGROUD_SERVER_PASSPHRASE }}
-                  key: ${{ secrets.PLAYGROUD_SERVER_SSH_KEY }}
+                  host: "${{ secrets.PLAYGROUD_SERVER_HOST }}"
+                  username: "${{ secrets.PLAYGROUD_SERVER_USERNAME }}"
+                  passphrase: "${{ secrets.PLAYGROUD_SERVER_PASSPHRASE }}"
+                  key: "${{ secrets.PLAYGROUD_SERVER_SSH_KEY }}"
                   script: |
                       cd playground
                       docker compose -f docker_compose.yml pull
