@@ -1,33 +1,33 @@
 services:
-  playground:
-    image: spawnlang/playground:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # NOTE: `privileged=true`and `pid=host` are required for `firejail` sandbox to work properly.
-    privileged: true
-    pid: host
-    restart: unless-stopped
-    ports:
-      - "5555:5555"
-    volumes:
-      - playground:/playground/storage
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5555"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "10"
-    # NOTE: this values where selected because of current VM that runs playground.
-    deploy:
-      resources:
-        limits:
-          cpus: '1.80'
-          memory: '3584M'
+    playground:
+        image: "spawnlang/playground:latest"
+        build:
+            context: "."
+            dockerfile: "Dockerfile"
+        # NOTE: `privileged=true`and `pid=host` are required for `firejail` sandbox to work properly.
+        privileged: true
+        pid: "host"
+        restart: "unless-stopped"
+        ports:
+            - "5555:5555"
+        volumes:
+            - "playground:/playground/storage"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:5555"]
+            interval: "5s"
+            timeout: "5s"
+            retries: 5
+            logging:
+                driver: "json-file"
+                options:
+                    max-size: "10m"
+                    max-file: "10"
+        # NOTE: this values where selected because of current VM that runs playground.
+        deploy:
+            resources:
+                limits:
+                    cpus: "1.80"
+                    memory: "3584M"
 
 volumes:
-  playground:
+    playground:  # yamllint disable-line rule:empty-values

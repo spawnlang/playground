@@ -1,48 +1,50 @@
-name: Build and push Playground Docker image
+name: "Build and push Playground Docker image"
 
 on:
     push:
         branches:
-            - main
+            - "main"
         paths-ignore:
-            - '.github/**'
-            - '.editorconfig'
-            - '.gitignore'
-            - 'LICENSE'
-            - 'README.md'
+            - ".github/**"
+            - ".editorconfig"
+            - ".gitignore"
+            - "LICENSE"
+            - "README.md"
     repository_dispatch:
         # NOTE: this value is also used in `trigger_playground_redeploy.yml` workflow in compiler repository.
         # if you need to change it - also change it there.
-        types: [ deploy ]
+        types: ["deploy"]
 
 jobs:
     build-and-push:
-        runs-on: ubuntu-latest
+        runs-on: "ubuntu-latest"
         # NOTE: building and pushing Docker image of Playground are pretty fast (around 3 minutes).
         # If this job takes more than 10 minutes, it means that something is wrong.
         timeout-minutes: 10
         steps:
             - name: "Checkout ${{ github.event.repository.name }}"
-              uses: actions/checkout@v4
+              uses: "actions/checkout@v4"
 
-            - name: Add short hash of current commit to environment variables
-              run: echo "CURRENT_COMMIT_SHORT_HASH=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+            - name: "Add short hash of current commit to environment variables"
+              run: "echo \"CURRENT_COMMIT_SHORT_HASH=$(git rev-parse --short \"$GITHUB_SHA\")\" >> \"$GITHUB_ENV\""
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+            - name: "Set up Docker Buildx"
+              uses: "docker/setup-buildx-action@v3"
 
-            - name: Login to Docker Hub
-              uses: docker/login-action@v3
+            - name: "Login to Docker Hub"
+              uses: "docker/login-action@v3"
               with:
-                  username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+                  username: "${{ secrets.DOCKERHUB_USERNAME }}"
+                  password: "${{ secrets.DOCKERHUB_TOKEN }}"
 
-            - name: Build and push Playground's Docker image
-              uses: docker/build-push-action@v6
+            - name: "Build and push Playground's Docker image"
+              uses: "docker/build-push-action@v6"
               with:
                   push: true
-                  tags: spawnlang/playground:latest, spawnlang/playground:${{ env.CURRENT_COMMIT_SHORT_HASH }}
+                  tags: "spawnlang/playground:latest, spawnlang/playground:${{ env.CURRENT_COMMIT_SHORT_HASH }}"
                   # NOTE: there are few other options for the cache,
                   # see https://docs.docker.com/build/ci/github-actions/cache/#registry-cache
-                  cache-from: type=registry,ref=spawnlang/playground:latest
-                  cache-to: type=inline
+
+                  # ATTENTION: this string must be in CSV format, so don't add space after the comma.
+                  cache-from: "type=registry,ref=spawnlang/playground:latest"
+                  cache-to: "type=inline"
