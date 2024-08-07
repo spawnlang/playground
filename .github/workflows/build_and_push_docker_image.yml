@@ -22,7 +22,7 @@ jobs:
         # If this job takes more than 10 minutes, it means that something is wrong.
         timeout-minutes: 10
         steps:
-            - name: Clone Playground repo
+            - name: "Checkout ${{ github.event.repository.name }}"
               uses: actions/checkout@v4
 
             - name: Add short hash of current commit to environment variables

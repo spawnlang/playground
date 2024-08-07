@@ -1,0 +1,20 @@
+name: "New changes validation"
+
+on:
+    pull_request:  # yamllint disable-line rule:empty-values
+
+jobs:
+    validate-new-changes:
+        runs-on: "ubuntu-latest"
+        # NOTE: validating new changes takes around 1 minute.
+        # If this job takes more than 5 minutes, it means that something is wrong.
+        timeout-minutes: 5
+        steps:
+            - name: "Checkout ${{ github.event.repository.name }}"
+              uses: "actions/checkout@v4"
+            - name: "Run YAML linter"
+              uses: "docker://spawnlang/yaml-linter:latest"
+              with:
+                  # NOTE: We must copy repo to linter_workdir to its own directory, because if we just copy to
+                  # linter_workdir, our .yamllint file will be overwritten and linter will use the default one.
+                  args: "-v ${{ github.workspace }}:/linter_workdir/repo"
