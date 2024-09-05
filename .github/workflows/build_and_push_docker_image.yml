@@ -10,6 +10,7 @@ on:
             - ".gitignore"
             - "LICENSE"
             - "README.md"
+            - "server/README.md"
     repository_dispatch:
         # NOTE: this value is also used in `trigger_playground_redeploy.yml` workflow in compiler repository.
         # if you need to change it - also change it there.
