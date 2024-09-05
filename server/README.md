@@ -56,7 +56,8 @@ Additional form fields:
 #### Request
 
 ```curl
-curl -X POST localhost:5555/run_test -F 'code="fn test_foo() { assert 100 == 100 }"'
+curl -X POST localhost:5555/run_test \
+-F 'code="fn test_foo() { assert 100 == 100 }"'
 ```
 
 #### Response

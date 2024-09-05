@@ -12,10 +12,10 @@ run, edit and share Spawn code online.
 - Ability to [run code as tests](https://docs.spawnlang.dev/tools/playground.html#test)
 - Ability to [see generated C code](https://docs.spawnlang.dev/tools/playground.html#show-generated-c-code)
   for passed Spawn code
-- Pass [flags](https://docs.spawnlang.dev/tools/playground.html#pass-arguments-to-compiler) to Spawn
-  compiler and binary
-- [Shareable](https://docs.spawnlang.dev/tools/playground.html#share-code) code and editor state
-  via URL or local storage
+- Pass [flags](https://docs.spawnlang.dev/tools/playground.html#pass-arguments-to-compiler)
+  to Spawn compiler and binary
+- [Shareable](https://docs.spawnlang.dev/tools/playground.html#share-code) code
+  and editor state via URL or local storage
 
 ## Developing
 
@@ -52,7 +52,8 @@ then access the playground at <http://localhost:5555>
 
 ## Server API
 
-See [server/README.md](./server/README.md) for more information about the server API.
+See [server/README.md](./server/README.md) for more information about the server
+API.
 
 ## License
 
