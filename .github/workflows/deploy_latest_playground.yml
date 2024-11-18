@@ -15,7 +15,7 @@ jobs:
         timeout-minutes: 5
         steps:
             - name: "Deploying Playground on the server"
-              uses: "appleboy/ssh-action@v1.0.3"
+              uses: "appleboy/ssh-action@v1.2.0"
               with:
                   host: "${{ secrets.PLAYGROUD_SERVER_HOST }}"
                   username: "${{ secrets.PLAYGROUD_SERVER_USERNAME }}"
