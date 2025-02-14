@@ -30,6 +30,6 @@
   },
   "homepage": "https://play.spawnlang.dev/",
   "dependencies": {
-    "sass": "^1.78.0"
+    "sass": "^1.85.0"
   }
 }
